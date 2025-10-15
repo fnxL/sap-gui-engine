@@ -93,6 +93,13 @@ class SAPGuiEngine:
         logger.info("Attached to connection session successfully.")
         return True
 
+    def close_connection(self):
+        self.session = None
+        self.connection.CloseSession("ses[0]")
+        self.connection = None
+        self.app = None
+        logging.info("Connection closed successfully.")
+
     def findById(self, id: str):
         try:
             return SAPElement(self.session.findById(id))
