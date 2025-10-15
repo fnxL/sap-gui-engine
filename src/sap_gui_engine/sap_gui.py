@@ -6,7 +6,7 @@ from pywinauto.application import Application
 from sap_gui_engine.vkey import VKey
 from sap_gui_engine.sap_element import SAPElement
 from sap_gui_engine.mappings.login import DEFAULT_LOGIN_ELEMENTS, LoginScreenElements
-from sap_gui_engine.exceptions import LoginError
+from sap_gui_engine.exceptions import LoginError, TransactionError
 
 logger = logging.getLogger(__name__)
 
@@ -83,9 +83,11 @@ class SAPGuiEngine:
             self.connection = self.app.OpenConnection(connection_name, True)
         except Exception as e:
             logger.error(f"Error opening connection: {e}")
-            raise ValueError(
-                f"Cannot open connection {connection_name}. Please check connection name"
-            )
+            if "'sapgui component' could not be instantiated" in str(e).lower():
+                logger.error("Please check your internet connection.")
+                raise RuntimeError("Please check your internet connection.")
+
+            raise ValueError("Please check your connection name.")
 
         self.session = self.connection.Children(0)
         logger.info("Attached to connection session successfully.")
@@ -130,14 +132,6 @@ class SAPGuiEngine:
         except Exception as e:
             logger.error(f"Error getting status bar information: {e}")
             return None
-
-    def _raise_if_error(self):
-        # TODO: Take screenshot and save it
-        status = self.get_status_info()
-        if status["type"] == "E":
-            logger.error(f"Operation failed with status: {status}")
-            logger.error(f"Error: {status['text']}")
-            raise Exception(status["text"])
 
     def get_document_number(self):
         status = self.get_status_info()
@@ -188,10 +182,12 @@ class SAPGuiEngine:
     def start_transaction(self, tcode: str, new_transaction: bool = True):
         if new_transaction:
             self.session.StartTransaction(tcode)
-            self._raise_if_error()
-            return True
+        else:
+            self.session.SendCommand(tcode)
 
-        self.session.SendCommand(tcode)
-        self._raise_if_error()
+        status = self.get_status_info()
+        if "does not exist" in status["text"].lower():
+            logger.error(status["text"])
+            raise TransactionError(status["text"])
+
         return True
-

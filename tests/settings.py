@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class TestSettings(BaseSettings):
+class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env.test", case_sensitive=False, extra="ignore"
     )
