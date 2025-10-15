@@ -131,6 +131,23 @@ class SAPGuiEngine:
             logger.error(f"Error getting status bar information: {e}")
             return None
 
+    def _raise_if_error(self):
+        # TODO: Take screenshot and save it
+        status = self.get_status_info()
+        if status["type"] == "E":
+            logger.error(f"Operation failed with status: {status}")
+            logger.error(f"Error: {status['text']}")
+            raise Exception(status["text"])
+
+    def get_document_number(self):
+        status = self.get_status_info()
+        try:
+            return status["text"].split(" ")[3]
+        except Exception as e:
+            logger.error(f"Error getting document number: {status}")
+            logger.error(e)
+            raise e
+
     def login(
         self,
         username: str,
@@ -162,8 +179,19 @@ class SAPGuiEngine:
         try:
             if str(self.findById("wnd[1]").text).lower() == "information":
                 self.sendVKey(VKey.ENTER, window=1)
-        except Exception as e:
+        except Exception:
             # The popup dialog did not appear, so we can continue
             pass
 
         return True
+
+    def start_transaction(self, tcode: str, new_transaction: bool = True):
+        if new_transaction:
+            self.session.StartTransaction(tcode)
+            self._raise_if_error()
+            return True
+
+        self.session.SendCommand(tcode)
+        self._raise_if_error()
+        return True
+
