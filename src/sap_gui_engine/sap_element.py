@@ -27,6 +27,15 @@ class SAPElement:
         self.text = element.text
         self.changeable = element.changeable
 
+    def get_text(self) -> str:
+        """
+        Get the current value/text of the SAP element.
+
+        Returns:
+            str: The text value of the element
+        """
+        return str(self.text)
+
     def set_text(self, text: str) -> bool:
         """
         Sets or selects a text value for supported SAP element types.
@@ -118,11 +127,4 @@ class SAPElement:
 
         return True
 
-    def get_value(self) -> str:
-        """
-        Get the current value/text of the SAP element.
 
-        Returns:
-            str: The text value of the element
-        """
-        return str(self.text)

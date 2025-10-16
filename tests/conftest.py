@@ -17,4 +17,5 @@ def engine(config: Settings):
     )
     engine.close_connection()
     engine.open_connection(config.sap_connection_name)
+    engine.login(username=config.sap_username, password=config.sap_password)
     yield engine

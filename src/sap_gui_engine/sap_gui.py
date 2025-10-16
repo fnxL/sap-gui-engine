@@ -156,8 +156,8 @@ class SAPGuiEngine:
         terminate_other_sessions: bool = True,
         login_screen_elements: LoginScreenElements = DEFAULT_LOGIN_ELEMENTS,
     ):
-        self.findById(login_screen_elements.username).set_value(username)
-        self.findById(login_screen_elements.password).set_value(password)
+        self.findById(login_screen_elements.username).set_text(username)
+        self.findById(login_screen_elements.password).set_text(password)
         self.sendVKey(VKey.ENTER)
 
         status = self.get_status_info()
