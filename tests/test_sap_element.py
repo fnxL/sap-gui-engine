@@ -32,3 +32,11 @@ def test_set_text_field(sap: SAPGuiEngine):
     assert sap_element_value == "102133"
     assert element.type == "GuiCTextField"
 
+def test_set_text_combobox(sap: SAPGuiEngine):
+    # Billing block
+    element = sap.findById("wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\01/ssubSUBSCREEN_BODY:SAPMV45A:4400/ssubHEADER_FRAME:SAPMV45A:4440/cmbVBAK-FAKSK")
+    result = element.set_text("Calculation Missing")
+    assert result is True
+
+    refresh_element = sap.findById("wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\01/ssubSUBSCREEN_BODY:SAPMV45A:4400/ssubHEADER_FRAME:SAPMV45A:4440/cmbVBAK-FAKSK")
+    assert refresh_element.get_text() == "Calculation Missing"

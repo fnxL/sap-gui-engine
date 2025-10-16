@@ -24,8 +24,10 @@ class SAPElement:
         self.element = element
         self.name = element.name
         self.type = element.type
-        self.text = element.text
+        self.text = str(element.text).strip()
         self.changeable = element.changeable
+        if self.type == "GuiComboBox":
+            self.key = element.key
 
     def get_text(self) -> str:
         """
@@ -126,5 +128,3 @@ class SAPElement:
             raise RuntimeError(f"Error clicking element {self.element.name}") from e
 
         return True
-
-
