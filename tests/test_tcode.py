@@ -10,3 +10,7 @@ def test_tcode_success(engine: SAPGuiEngine):
 def test_tcode_failure(engine: SAPGuiEngine):
     with pytest.raises(TransactionError, match="does not exist"):
         engine.start_transaction(tcode="invalid_tcode")
+
+def test_status_info(engine: SAPGuiEngine):
+    status = engine.get_status_info()
+    assert "does not exist" in status["text"]
