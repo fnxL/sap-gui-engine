@@ -1,6 +1,6 @@
 import logging
 from typing import Any
-from sap_gui_engine.exceptions import ComboBoxItemNotFoundError
+from sap_gui_engine.exceptions import ComboBoxOptionNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +27,9 @@ class SAPElement:
         self.text = element.text
         self.changeable = element.changeable
 
-    def set_value(self, value: str) -> bool:
+    def set_text(self, text: str) -> bool:
         """
-        Sets or selects a value for supported SAP element types.
+        Sets or selects a text value for supported SAP element types.
 
         This method will only operate on changeable elements. For non-changeable
         elements, it logs an info message and returns False.
@@ -46,7 +46,7 @@ class SAPElement:
             bool: True if the value was successfully set, False otherwise
 
         Raises:
-            ComboBoxItemNotFoundError: If the specified item is not found in a combobox
+            ComboBoxOptionNotFoundError: If the specified item is not found in a combobox
             ValueError: If there's an error setting the value for a text field
         """
         if not self.changeable:
@@ -54,20 +54,20 @@ class SAPElement:
             return False
 
         if self.type == "GuiComboBox":
-            return self._select_from_combobox(value)
+            return self._select_from_combobox(text)
 
         try:
-            self.element.text = value
+            self.element.text = text
             return True
         except Exception as e:
-            logger.error(f"Error setting value for element {self.element.name}: {e}")
+            logger.error(f"Error setting text for element {self.element.name}: {e}")
             raise ValueError(
-                f"Error setting value for element {self.element.name}"
+                f"Error setting text for element {self.element.name}"
             ) from e
 
-    def _select_from_combobox(self, item: str) -> bool:
+    def _select_from_combobox(self, text: str) -> bool:
         """
-        Selects an item in a GuiComboBox element by matching its value.
+        Selects an option in a GuiComboBox element by matching its text.
 
         Args:
             item (str): The value of the item to select
@@ -76,16 +76,16 @@ class SAPElement:
             bool: True if the item was successfully selected
 
         Raises:
-            ComboBoxItemNotFoundError: If the specified item is not found in the combobox
+            ComboBoxOptionNotFoundError: If the specified item is not found in the combobox
         """
         key = None
         for entry in self.element.entries:
-            if entry.value.lower() == item.lower():
+            if entry.value.lower() == text.lower():
                 key = entry.key
                 break
 
         if not key:
-            raise ComboBoxItemNotFoundError(f"Item: {item} not found in combobox")
+            raise ComboBoxOptionNotFoundError(f"Option: {text} not found in combobox")
 
         self.element.key = key
         return True
