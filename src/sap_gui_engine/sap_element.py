@@ -109,7 +109,7 @@ class SAPElement:
         - GuiButton: Presses the button
         - GuiTab: Selects the tab
         - GuiRadioButton: Selects the radio button
-        - GuiCheckBox: Checks the checkbox
+        - GuiCheckBox: Calling this method will toggle the checkbox
 
         Returns:
             bool: True after successfully performing the click action
@@ -122,7 +122,7 @@ class SAPElement:
             elif self.type == "GuiRadioButton":
                 self.element.select()
             elif self.type == "GuiCheckBox":
-                self.element.selected = True
+                self.element.selected = not self.element.selected
         except Exception as e:
             logger.error(f"Error clicking element {self.element.name}: {e}")
             raise RuntimeError(f"Error clicking element {self.element.name}") from e
