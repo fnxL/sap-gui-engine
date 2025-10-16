@@ -2,14 +2,11 @@ import pytest
 from settings import Settings
 from sap_gui_engine import SAPGuiEngine
 from sap_gui_engine.exceptions import LoginError
-from fixtures import *
-
 
 @pytest.mark.order(1)
 def test_login_failure(engine: SAPGuiEngine):
     with pytest.raises(LoginError, match="password is incorrect"):
         engine.login(username="invalid", password="invalid")
-
 
 @pytest.mark.order(2)
 def test_login_success(engine: SAPGuiEngine, config: Settings):

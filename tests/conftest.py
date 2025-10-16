@@ -10,8 +10,11 @@ def config():
 
 @pytest.fixture(scope="session")
 def engine(config: Settings):
-    return SAPGuiEngine(
+    engine =  SAPGuiEngine(
         connection_name=config.sap_connection_name,
         window_title=config.sap_window_title,
         executable_path=config.sap_executable_path,
     )
+    engine.close_connection()
+    engine.open_connection(config.sap_connection_name)
+    yield engine

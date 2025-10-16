@@ -1,5 +1,4 @@
 import pytest
-from fixtures import *
 from sap_gui_engine import SAPGuiEngine
 from sap_gui_engine.exceptions import TransactionError
 
