@@ -9,7 +9,7 @@ def config():
 
 
 @pytest.fixture(scope="session")
-def engine(config: Settings):
+def sap(config: Settings):
     engine =  SAPGuiEngine(
         connection_name=config.sap_connection_name,
         window_title=config.sap_window_title,
