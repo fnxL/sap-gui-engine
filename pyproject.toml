@@ -1,12 +1,12 @@
 [project]
 name = "sap-gui-engine"
 version = "0.1.0"
-description = "Add your description here"
+description = "A framework for interacting with the SAP GUI Scripting API."
 readme = "README.md"
 authors = [
     { name = "fnxL", email = "48607132+fnxL@users.noreply.github.com" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 dependencies = [
     "pywinauto>=0.6.9",
 ]

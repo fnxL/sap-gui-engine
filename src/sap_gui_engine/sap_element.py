@@ -21,13 +21,38 @@ class SAPElement:
         Args:
             element: The underlying SAP GUI element object
         """
-        self.element = element
-        self.name = element.name
-        self.type = element.type
-        self.text = str(element.text).strip()
-        self.changeable = element.changeable
-        if self.type == "GuiComboBox":
-            self.key = element.key
+        self._element = element
+        self._name = element.name
+        self._type = element.type
+        self._text = str(element.text).strip()
+        self._changeable = element.changeable
+        if self._type == "GuiComboBox":
+            self._key = element.key
+
+    @property
+    def element(self) -> Any:
+        """Get the underlying SAP GUI element."""
+        return self._element
+
+    @property
+    def name(self) -> str:
+        """Get the name of the SAP element."""
+        return self._name
+
+    @property
+    def type(self) -> str:
+        """Get the type of the SAP element."""
+        return self._type
+
+    @property
+    def text(self) -> str:
+        """Get the text value of the SAP element."""
+        return self._text
+
+    @property
+    def changeable(self) -> bool:
+        """Get whether the SAP element is changeable."""
+        return self._changeable
 
     def get_text(self) -> str:
         """
@@ -36,14 +61,13 @@ class SAPElement:
         Returns:
             str: The text value of the element
         """
-        return str(self.text)
+        return str(self._text)
 
     def set_text(self, text: str) -> bool:
         """
         Sets or selects a text value for supported SAP element types.
 
-        This method will only operate on changeable elements. For non-changeable
-        elements, it logs an info message and returns False.
+        This method will only operate on changeable elements. For non-changeable elements, it logs an info message and returns False.
 
         Supported element types:
         - GuiTextField: Sets the text property
@@ -60,21 +84,33 @@ class SAPElement:
             ComboBoxOptionNotFoundError: If the specified item is not found in a combobox
             ValueError: If there's an error setting the value for a text field
         """
-        if not self.changeable:
-            logger.info(f"Element {self.element.name} is not changeable")
+        if not self._changeable:
+            logger.info(f"Element {self._element.name} is not changeable")
             return False
 
-        if self.type == "GuiComboBox":
+        if self._type == "GuiComboBox":
             return self._select_from_combobox(text)
 
-        try:
-            self.element.text = text
-            return True
-        except Exception as e:
-            logger.error(f"Error setting text for element {self.element.name}: {e}")
-            raise ValueError(
-                f"Error setting text for element {self.element.name}"
-            ) from e
+        match self._type:
+            case "GuiTextField" | "GuiCTextField":
+                try:
+                    self._element.text = text
+                    # Update internal text value after setting
+                    self._text = str(self._element.text).strip()
+                    return True
+                except Exception as e:
+                    logger.error(
+                        f"Error setting text for element {self._element.name}: {e}"
+                    )
+                    raise ValueError(
+                        f"Error setting text for element {self._element.name}"
+                    ) from e
+            case _:
+                # For any other element type that is not supported for text setting
+                logger.warning(
+                    f"Setting text is not supported for element type: {self._type}"
+                )
+                return False
 
     def _select_from_combobox(self, text: str) -> bool:
         """
@@ -90,7 +126,7 @@ class SAPElement:
             ComboBoxOptionNotFoundError: If the specified item is not found in the combobox
         """
         key = None
-        for entry in self.element.entries:
+        for entry in self._element.entries:
             if entry.value.lower() == text.lower():
                 key = entry.key
                 break
@@ -98,7 +134,9 @@ class SAPElement:
         if not key:
             raise ComboBoxOptionNotFoundError(f"Option: {text} not found in combobox")
 
-        self.element.key = key
+        self._element.key = key
+        # TODO: Find a way to update/refresh the element's state.
+
         return True
 
     def click(self) -> bool:
@@ -115,16 +153,17 @@ class SAPElement:
             bool: True after successfully performing the click action
         """
         try:
-            if self.type == "GuiButton":
-                self.element.press()
-            elif self.type == "GuiTab":
-                self.element.select()
-            elif self.type == "GuiRadioButton":
-                self.element.select()
-            elif self.type == "GuiCheckBox":
-                self.element.selected = not self.element.selected
+            match self._type:
+                case "GuiButton":
+                    self._element.press()
+                case "GuiTab":
+                    self._element.select()
+                case "GuiRadioButton":
+                    self._element.select()
+                case "GuiCheckBox":
+                    self._element.selected = not self._element.selected
         except Exception as e:
-            logger.error(f"Error clicking element {self.element.name}: {e}")
-            raise RuntimeError(f"Error clicking element {self.element.name}") from e
+            logger.error(f"Error clicking element {self._element.name}: {e}")
+            raise RuntimeError(f"Error clicking element {self._element.name}") from e
 
         return True
