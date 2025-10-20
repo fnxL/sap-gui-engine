@@ -1,6 +1,6 @@
 [project]
 name = "sap-gui-engine"
-version = "0.1.1b2"
+version = "0.1.1b3"
 description = "A framework for interacting with the SAP GUI Scripting API."
 readme = "README.md"
 authors = [
@@ -10,6 +10,12 @@ requires-python = ">=3.10"
 dependencies = [
     "pywinauto>=0.6.9",
 ]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+
+[project.urls]
+Homepage = "https://github.com/fnxL/sap-gui-engine"
+Issues = "https://github.com/fnxL/sap-gui-engine/issues"
 
 [build-system]
 requires = ["uv_build>=0.8.2,<0.9.0"]
