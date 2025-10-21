@@ -36,7 +36,7 @@ class SAPGuiElement(GuiVComponent):
         return self._text
 
     @text.setter
-    def text(self, value: str) -> None:
+    def text(self, value: str) -> bool:
         """
         Sets or selects a text value for supported SAP element types.
 
