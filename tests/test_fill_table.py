@@ -4,6 +4,7 @@ from pathlib import Path
 import polars as pl
 
 
+# TODO: Improve assertion by checking each cell value against dataframe
 def test_fill_table(sap: SAPGuiEngine):
     df_path = Path("tests/data/fill_table.xlsx")
     if not df_path.exists():
@@ -25,6 +26,9 @@ def test_fill_table(sap: SAPGuiEngine):
     sap.findById(
         "wnd[0]/usr/subSUBSCREEN_HEADER:SAPMV45A:4021/ctxtVBKD-BSTDK"
     ).text = datetime.now(timezone.utc).strftime("%d.%m.%Y")
+    sap.findById(
+        r"wnd[0]/usr/subSUBSCREEN_HEADER:SAPMV45A:4021/txtVBKD-BSTKD"
+    ).text = "PO123456"
     sap.send_enter()
     sap.findById("wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\08").click()
     sap.findById(
@@ -40,4 +44,4 @@ def test_fill_table(sap: SAPGuiEngine):
     ).element.rows:
         items_list.append(str(row.Item(0).text).strip().lower())
 
-    assert "0300" in items_list
+    assert "290" in items_list
