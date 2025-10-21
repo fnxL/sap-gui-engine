@@ -92,7 +92,7 @@ class SAPElement:
             return self._select_from_combobox(text)
 
         match self._type:
-            case "GuiTextField" | "GuiCTextField":
+            case "GuiTextField" | "GuiCTextField" | "GuiPasswordField":
                 try:
                     self._element.text = text
                     # Update internal text value after setting

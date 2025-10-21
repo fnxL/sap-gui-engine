@@ -26,16 +26,9 @@ class SAPGuiEngine:
             executable_path = Path(executable_path)
 
         self._launcher = SAPLauncher(executable_path, window_title)
-        self._connection_manager = SAPConnectionManager(
-            connection_name, window_title, executable_path
-        )
-
+        self._connection_manager = SAPConnectionManager(connection_name, window_title)
         self._launcher.launch_sap()
-        self._connection_manager.open_connection(connection_name)
-
-        session = self._connection_manager.session
-        self._window_manager = SAPWindowManager(session)
-        self._window_manager.maximize()
+        self.open_connection(connection_name)
 
     @property
     def connection_name(self) -> str:
@@ -53,7 +46,12 @@ class SAPGuiEngine:
 
     def open_connection(self, connection_name: str) -> bool:
         """Tries to connect to existing open connection, if not found then opens new one."""
-        return self._connection_manager.open_connection(connection_name)
+        self._connection_manager.open_connection(connection_name)
+        logger.info("Connection opened successfully.")
+        self._window_manager = None
+        self._window_manager = SAPWindowManager(self.session)
+        self._window_manager.maximize()
+        return True
 
     def close_connection(self) -> None:
         """Closes the current SAP connection."""
@@ -73,11 +71,11 @@ class SAPGuiEngine:
 
     def get_status_info(self) -> dict[str, Any] | None:
         """Gets current status bar information."""
-        return self._status_manager.get_status_info()
+        return self._window_manager.get_status_info()
 
     def get_document_number(self) -> str:
         """Extracts document number from status bar when document is created successfully using va01 transaction."""
-        return self._status_manager.get_document_number()
+        return self._window_manager.get_document_number()
 
     def login(
         self,
