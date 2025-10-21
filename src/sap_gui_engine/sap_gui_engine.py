@@ -170,7 +170,7 @@ class SAPGuiEngine:
                 useful for selectively updating a subset of columns. Cannot be used with `exclude_columns`.
 
             exclude_columns (Optional): If provided, prevents data entry into the specified SAP table column titles. This is
-                useful for avoidingupdates to certain fields. Cannot be used with `filter_columns`
+                useful for avoiding updates to certain fields. Cannot be used with `filter_columns`
         Returns:
             None: The function performs an action (modifying the SAP GUI) and does not return a value.
 
@@ -211,6 +211,7 @@ class SAPGuiEngine:
 
             # Fill row data
             for col, value in row.items():
+                col = col.lower()
                 if col in col_idx_map:
                     col_idx = col_idx_map[col]
                     text = "" if value is None else str(value)
@@ -228,5 +229,88 @@ class SAPGuiEngine:
 
         # After filling all the rows, final commit to save changes
         self.send_enter()
-        # Handle all popup dialogs
+        self.handle_popups_until_none()
+
+    def edit_table(
+        self,
+        table_id: str,
+        df: pl.DataFrame,
+        filter_columns: list[str] | None = None,
+        exclude_columns: list[str] | None = None,
+    ):
+        """
+        Edits a specified SAP GUI table with rows from a Polars DataFrame.
+
+        The function iterates through the DataFrame and maps its columns to the SAP table's
+        column titles. The mapping logic is case-insensitive and trims whitespace from titles
+        to ensure reliable matching. It handles pagination automatically by sending the ENTER
+        key when the visible rows are filled.
+
+        Columns in the DataFrame that do not have a corresponding title in the SAP table are
+        silently ignored. Columns in the SAP table that are not present in the DataFrame will
+        remain empty.
+
+        Args:
+            table_id : The ID of the SAP table element to fill.
+
+            df: The Polars DataFrame containing the data. The DataFrame should have columns that correspond to the titles in the
+                SAP table.
+
+            filter_columns (Optional): If provided, restricts editing data to only the specified SAP table column titles. This is
+                useful for selectively updating a subset of columns. Cannot be used with `exclude_columns`.
+
+            exclude_columns (Optional): If provided, prevents editing data into the specified SAP table column titles. This is
+                useful for avoiding updates to certain fields. Cannot be used with `filter_columns`
+        Returns:
+            None: The function performs an action (modifying the SAP GUI) and does not return a value.
+
+        Raises:
+            ValueError: If both `filter_columns` and `exclude_columns` are provided
+        """
+        if filter_columns and exclude_columns:
+            raise ValueError(
+                "Both filter_columns and exclude_columns cannot be used together"
+            )
+
+        table = self.session.findById(table_id)
+        if table.type != "GuiTableControl":
+            raise ValueError(f"Element {table_id} is not a table")
+
+        table = GuiTableControl(table)
+        table.set_scroll_position(0)
+        # Refresh table
+        table = GuiTableControl(self.session.findById(table_id))
+
+        total_rows = df.height
+        if total_rows == 0:
+            logger.info("Data contains no items")
+            return
+
+        logger.info(f"Total rows: {total_rows}")
+
+        col_idx_map = table.get_column_idx_map(
+            filter_columns=filter_columns, exclude_columns=exclude_columns
+        )
+        visible_rows = table.visible_row_count
+        i = 0
+
+        for row in df.iter_rows(named=True):
+            current_row = i % visible_rows
+            for col, value in row.items():
+                col = col.lower()
+                if col in col_idx_map:
+                    col_idx = col_idx_map[col]
+                    text = "" if value is None else str(value)
+                    table.get_cell(current_row, col_idx).text = text
+
+            if (current_row + 1) % visible_rows == 0:
+                self.sendVKey(VKey.PAGE_DOWN)
+                self.handle_popups_until_none
+                # Refresh table
+                table = GuiTableControl(self.session.findById(table_id))
+
+            i += 1
+
+        # After filling all the rows, final commit to save changes
+        self.send_enter()
         self.handle_popups_until_none()

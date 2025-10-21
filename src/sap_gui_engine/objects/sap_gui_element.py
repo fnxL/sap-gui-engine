@@ -103,6 +103,25 @@ class SAPGuiElement(GuiComponent):
 
         return True
 
+    def press(self) -> bool:
+        """
+        Alias for click().
+        Useful for button-like elements.
+
+        Returns:
+            bool: True after successfully performing the press action
+        """
+        return self.click()
+
+    def select(self) -> bool:
+        """
+        Alias for click method - selects the SAP element.
+        Useful for tabs, radio buttons, and menu items.
+
+        Returns:
+            bool: True after successfully performing the select action
+        """
+
     def _select_combobox_entry_by_text(self, text: str) -> bool:
         """
         Selects an entry in GuiComboBox element by matching its text.
