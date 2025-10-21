@@ -70,7 +70,7 @@ The main class that orchestrates SAP interactions. It handles:
 - Managing sessions
 - Providing access to SAP elements and functionality
 
-### SAPElement
+### SAPGuiElement
 
 A wrapper class that provides a consistent interface for interacting with different types of SAP controls:
 

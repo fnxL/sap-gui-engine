@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 from sap_gui_engine.vkey import VKey
-from sap_gui_engine.sap_element import SAPElement
+from sap_gui_engine.objects import SAPGuiElement
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +28,10 @@ class SAPWindowManager:
             logger.error(f"Error sending vkey {key} to window {window}: {e}")
             raise RuntimeError(f"Error sending vkey {key} to window {window}")
 
-    def find_element(self, element_id: str) -> SAPElement:
+    def find_element(self, element_id: str):
         """Finds an SAP element by ID."""
         try:
-            return SAPElement(self._session.findById(element_id))
+            return SAPGuiElement(self._session.findById(element_id))
         except Exception as e:
             logger.error(f"Error getting element {element_id}: {e}")
             raise RuntimeError(f"Error getting element {element_id}")

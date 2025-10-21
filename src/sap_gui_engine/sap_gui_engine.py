@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any
 
 from sap_gui_engine.vkey import VKey
-from sap_gui_engine.sap_element import SAPElement
+from sap_gui_engine.objects import SAPGuiElement
 from sap_gui_engine.mappings.login import DEFAULT_LOGIN_ELEMENTS, LoginScreenElements
 from sap_gui_engine.exceptions import LoginError, TransactionError
 from sap_gui_engine.managers import (
@@ -65,7 +65,7 @@ class SAPGuiEngine:
         """Sends a virtual key to a window."""
         return self._window_manager.send_vkey(key, window, times)
 
-    def findById(self, id: str) -> SAPElement:
+    def findById(self, id: str) -> SAPGuiElement:
         """Finds an SAP element by ID."""
         return self._window_manager.find_element(id)
 
