@@ -19,12 +19,17 @@ def test_set_text_non_changeable(sap: SAPGuiEngine):
     sap.findById("wnd[0]/usr/ctxtVBAK-SPART").text = "00"
     sap.sendVKey(VKey.ENTER)
 
+    # Get the unchangeable text field
     element = sap.findById("wnd[0]/usr/subSUBSCREEN_HEADER:SAPMV45A:4021/txtVBAK-NETWR")
 
     assert element.type == "GuiTextField"
     assert element.changeable is False
-    result = element.text = "new value"
-    assert result is False
+    # Try to set the text field
+    element.text = "new value"
+
+    # Refresh element
+    element = sap.findById("wnd[0]/usr/subSUBSCREEN_HEADER:SAPMV45A:4021/txtVBAK-NETWR")
+    assert element.text != "new value"
 
 
 def test_click_button(sap: SAPGuiEngine):
@@ -37,12 +42,13 @@ def test_set_text_field(sap: SAPGuiEngine):
     element = sap.findById(
         "wnd[0]/usr/subSUBSCREEN_HEADER:SAPMV45A:4021/subPART-SUB:SAPMV45A:4701/ctxtKUAGV-KUNNR"
     )
-    result = element.text = "102133"
-    assert result is True
-    sap_element_value = sap.findById(
+    element.text = "102133"
+
+    # Refresh element
+    element = sap.findById(
         "wnd[0]/usr/subSUBSCREEN_HEADER:SAPMV45A:4021/subPART-SUB:SAPMV45A:4701/ctxtKUAGV-KUNNR"
-    ).text
-    assert sap_element_value == "102133"
+    )
+    assert element.text == "102133"
     assert element.type == "GuiCTextField"
 
 
@@ -51,13 +57,15 @@ def test_set_text_combobox(sap: SAPGuiEngine):
     element = sap.findById(
         "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\01/ssubSUBSCREEN_BODY:SAPMV45A:4400/ssubHEADER_FRAME:SAPMV45A:4440/cmbVBAK-FAKSK"
     )
-    result = element.text = "Calculation Missing"
-    assert result is True
+    element.text = "Calculation Missing"
+    assert element.type == "GuiComboBox"
 
-    refresh_element = sap.findById(
+    # Refresh element
+    element = sap.findById(
         "wnd[0]/usr/tabsTAXI_TABSTRIP_OVERVIEW/tabpT\\01/ssubSUBSCREEN_BODY:SAPMV45A:4400/ssubHEADER_FRAME:SAPMV45A:4440/cmbVBAK-FAKSK"
     )
-    assert refresh_element.text == "Calculation Missing"
+    assert element.text == "Calculation Missing"
+    assert element.type == "GuiComboBox"
 
 
 def test_click_tab(sap: SAPGuiEngine):

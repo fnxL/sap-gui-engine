@@ -40,7 +40,7 @@ class SAPGuiElement(GuiVComponent):
         """
         Sets or selects a text value for supported SAP element types.
 
-        This method will only operate on changeable elements. For non-changeable elements, it logs an info message and returns False.
+        This method will only operate on changeable elements. For unchangeable elements, it logs an info message and returns.
 
         Supported element types:
         - GuiTextField: Sets the text property
@@ -57,7 +57,7 @@ class SAPGuiElement(GuiVComponent):
         """
         if not self._changeable:
             logger.info(f"Element {self._element.name} is not changeable")
-            return False
+            return
 
         # TODO: Add support for selecting combobox entry by value
         if self._type == "GuiComboBox":
@@ -67,7 +67,7 @@ class SAPGuiElement(GuiVComponent):
             self._element.Text = value
             # Update internal text value after setting
             self._text = str(self._element.text).strip()
-            return True
+            return
         except Exception as e:
             logger.error(f"Error setting text for element {self._element.name}: {e}")
             raise ValueError(
