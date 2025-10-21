@@ -16,9 +16,16 @@ class GuiComponent:
         Args:
             element: The COM object representing the SAP GUI element
         """
-        self.container_type = element.ContainerType
-        self.id = element.id
-        self.name = element.name
-        self.parent = element.parent # The parent COM object
-        self.type = element.type
-        self.type_as_number = element.TypeAsNumber
+        # Set attributes only if they exist on the element
+        if hasattr(element, 'ContainerType'):
+            self.container_type = element.ContainerType
+        if hasattr(element, 'id'):
+            self.id = element.id
+        if hasattr(element, 'name'):
+            self.name = element.name
+        if hasattr(element, 'parent'):
+            self.parent = element.parent # The parent COM object
+        if hasattr(element, 'type'):
+            self.type = element.type
+        if hasattr(element, 'TypeAsNumber'):
+            self.type_as_number = element.TypeAsNumber

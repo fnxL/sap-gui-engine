@@ -25,24 +25,43 @@ class GuiVComponent(GuiComponent):
 
     def __init__(self, element: Any):
         super().__init__(element)
-        self.element = element # The COM object itself
-        self.acc_label_collection = element.AccLabelCollection
-        self.acc_text = element.AccText
-        self.acc_text_on_request = element.AccTextOnRequest
-        self.acc_tooltip = element.AccTooltip
-        self.changeable = element.Changeable
-        self.default_tooltip = element.DefaultTooltip
-        self.height = element.Height
-        self.icon_name = element.IconName
-        self.is_symbol_font = element.IsSymbolFont
-        self.left = element.Left
-        self.modified = element.Modified
-        self.parent_frame = element.ParentFrame
-        self.screen_left = element.ScreenLeft
-        self.screen_top = element.ScreenTop
-        self.tooltip = element.Tooltip
-        self.top = element.Top
-        self.width = element.Width
+        self.element = element
+
+        # Set attributes only if they exist on the element
+        if hasattr(element, 'AccLabelCollection'):
+            self.acc_label_collection = element.AccLabelCollection
+        if hasattr(element, 'AccText'):
+            self.acc_text = element.AccText
+        if hasattr(element, 'AccTextOnRequest'):
+            self.acc_text_on_request = element.AccTextOnRequest
+        if hasattr(element, 'AccTooltip'):
+            self.acc_tooltip = element.AccTooltip
+        if hasattr(element, 'Changeable'):
+            self.changeable = element.Changeable
+        if hasattr(element, 'DefaultTooltip'):
+            self.default_tooltip = element.DefaultTooltip
+        if hasattr(element, 'Height'):
+            self.height = element.Height
+        if hasattr(element, 'IconName'):
+            self.icon_name = element.IconName
+        if hasattr(element, 'IsSymbolFont'):
+            self.is_symbol_font = element.IsSymbolFont
+        if hasattr(element, 'Left'):
+            self.left = element.Left
+        if hasattr(element, 'Modified'):
+            self.modified = element.Modified
+        if hasattr(element, 'ParentFrame'):
+            self.parent_frame = element.ParentFrame
+        if hasattr(element, 'ScreenLeft'):
+            self.screen_left = element.ScreenLeft
+        if hasattr(element, 'ScreenTop'):
+            self.screen_top = element.ScreenTop
+        if hasattr(element, 'Tooltip'):
+            self.tooltip = element.Tooltip
+        if hasattr(element, 'Top'):
+            self.top = element.Top
+        if hasattr(element, 'Width'):
+            self.width = element.Width
 
     # Methods from SAP API
     def dump_state(self, inner_object: str = "") -> Any:
@@ -97,22 +116,3 @@ class GuiVComponent(GuiComponent):
             return self._element.Visualize(on, inner_object)
         else:
             return self._element.Visualize(on)
-
-    # Properties as direct attributes (previously using @property)
-    # acc_label_collection: Returns the collection of GuiLabel objects assigned to this control in the ABAP Screen Painter.
-    # acc_text: Returns an additional text for accessibility support.
-    # acc_text_on_request: Returns an additional text for accessibility support that is shown on request.
-    # acc_tooltip: Returns an additional tooltip text for accessibility support.
-    # changeable: Returns whether the object is changeable (not disabled or read-only).
-    # default_tooltip: Returns the tooltip text generated from the short text defined in the data dictionary for the given screen element type.
-    # height: Returns the height of the component in pixels.
-    # icon_name: Returns the name of the icon assigned to the object, or empty string if none assigned.
-    # is_symbol_font: Returns whether the component's text is visualized in the SAP symbol font.
-    # left: Returns the left position of the element in screen coordinates.
-    # modified: Returns whether the object is modified (state changed by user but not sent to SAP system).
-    # parent_frame: Returns the parent frame if the control is hosted by a Frame object, otherwise None.
-    # screen_left: Returns the y position of the component in screen coordinates.
-    # screen_top: Returns the x position of the component in screen coordinates.
-    # tooltip: Returns the tooltip text designed to help a user understand the meaning of a given text field or button.
-    # top: Returns the top coordinate of the element in screen coordinates.
-    # width: Returns the width of the component in pixels.
