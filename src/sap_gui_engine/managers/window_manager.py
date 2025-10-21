@@ -48,8 +48,8 @@ class SAPWindowManager:
         try:
             return SAPGuiElement(self._session.findById(element_id))
         except Exception as e:
-            logger.error(f"Error getting element {element_id}: {e}")
-            raise RuntimeError(f"Error getting element {element_id}")
+            logger.error(f"Cannot find element {element_id}: {e}")
+            raise ValueError(f"Cannot find element {element_id}.")
 
     def get_status_info(self) -> dict[str, Any] | None:
         """Gets current status bar information."""
