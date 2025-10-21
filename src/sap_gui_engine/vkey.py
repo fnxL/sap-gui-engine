@@ -28,7 +28,7 @@ class VKey(IntEnum):
     F8 = 8
     F9 = 9
     F10 = 10
-    SAVE = 11  # Ctrl+S
+    CTRL_S = 11
     F12 = 12
     SHIFT_F1 = 13
     SHIFT_F2 = 14
@@ -66,23 +66,24 @@ class VKey(IntEnum):
     CTRL_SHIFT_F10 = 46
     CTRL_SHIFT_F11 = 47
     CTRL_SHIFT_F12 = 48
-    FIND = 70  # Ctrl+E
-    SEARCH = 71  # Ctrl+F
-    COMMENT = 72  # Ctrl+/
-    UNCOMMENT = 73  # Ctrl+\
-    NEW_SESSION = 74  # Ctrl+N
-    OPEN = 75  # Ctrl+O
-    CUT = 76  # Ctrl+X
-    COPY = 77  # Ctrl+C
-    PASTE = 78  # Ctrl+V
-    UNDO = 79  # Ctrl+Z
-    CTRL_PAGE_UP = 80
-    PAGE_UP = 81
-    PAGE_DOWN = 82
-    CTRL_PAGE_DOWN = 83
-    GOTO = 84  # Ctrl+G
-    REFRESH = 85  # Ctrl+R
-    PRINT = 86  # Ctrl+P
+    # Values 49-69 are not defined in the SAP GUI_KEY Table
+    CTRL_E = 70  # Ctrl+E
+    CTRL_F = 71  # Ctrl+F
+    CTRL_SLASH = 72  # Ctrl+/
+    CTRL_BACKSLASH = 73  # Ctrl+\
+    CTRL_N = 74  # Ctrl+N
+    CTRL_O = 75  # Ctrl+O
+    CTRL_X = 76  # Ctrl+X
+    CTRL_C = 77  # Ctrl+C
+    CTRL_V = 78  # Ctrl+V
+    CTRL_Z = 79  # Ctrl+Z
+    CTRL_PAGE_UP = 80  # Ctrl+PageUp
+    PAGE_UP = 81  # PageUp
+    PAGE_DOWN = 82  # PageDown
+    CTRL_PAGE_DOWN = 83  # Ctrl+PageDown
+    CTRL_G = 84  # Ctrl+G
+    CTRL_R = 85  # Ctrl+R
+    CTRL_P = 86  # Ctrl+P
 
     def combo(self) -> str:
         """Return the SAP keyboard combination string for this VKey."""
@@ -108,7 +109,7 @@ _SAP_VKEY_COMBO_MAP = {
     VKey.F8: "F8",
     VKey.F9: "F9",
     VKey.F10: "F10",
-    VKey.SAVE: "Ctrl+S",
+    VKey.CTRL_S: "Ctrl+S",
     VKey.F12: "F12",
     VKey.SHIFT_F1: "Shift+F1",
     VKey.SHIFT_F2: "Shift+F2",
@@ -146,23 +147,23 @@ _SAP_VKEY_COMBO_MAP = {
     VKey.CTRL_SHIFT_F10: "Ctrl+Shift+F10",
     VKey.CTRL_SHIFT_F11: "Ctrl+Shift+F11",
     VKey.CTRL_SHIFT_F12: "Ctrl+Shift+F12",
-    VKey.FIND: "Ctrl+E",
-    VKey.SEARCH: "Ctrl+F",
-    VKey.COMMENT: "Ctrl+/",
-    VKey.UNCOMMENT: "Ctrl+\\",
-    VKey.NEW_SESSION: "Ctrl+N",
-    VKey.OPEN: "Ctrl+O",
-    VKey.CUT: "Ctrl+X",
-    VKey.COPY: "Ctrl+C",
-    VKey.PASTE: "Ctrl+V",
-    VKey.UNDO: "Ctrl+Z",
+    VKey.CTRL_E: "Ctrl+E",
+    VKey.CTRL_F: "Ctrl+F",
+    VKey.CTRL_SLASH: "Ctrl+/",
+    VKey.CTRL_BACKSLASH: "Ctrl+\\",
+    VKey.CTRL_N: "Ctrl+N",
+    VKey.CTRL_O: "Ctrl+O",
+    VKey.CTRL_X: "Ctrl+X",
+    VKey.CTRL_C: "Ctrl+C",
+    VKey.CTRL_V: "Ctrl+V",
+    VKey.CTRL_Z: "Ctrl+Z",
     VKey.CTRL_PAGE_UP: "Ctrl+PageUp",
     VKey.PAGE_UP: "PageUp",
     VKey.PAGE_DOWN: "PageDown",
     VKey.CTRL_PAGE_DOWN: "Ctrl+PageDown",
-    VKey.GOTO: "Ctrl+G",
-    VKey.REFRESH: "Ctrl+R",
-    VKey.PRINT: "Ctrl+P",
+    VKey.CTRL_G: "Ctrl+G",
+    VKey.CTRL_R: "Ctrl+R",
+    VKey.CTRL_P: "Ctrl+P",
 }
 
 # Reverse lookup map
