@@ -1,12 +1,12 @@
 import logging
 from typing import Any
 from sap_gui_engine.exceptions import ComboBoxOptionNotFoundError
-from .gui_vcomponent import GuiVComponent
+from .gui_component import GuiComponent
 
 logger = logging.getLogger(__name__)
 
 
-class SAPGuiElement(GuiVComponent):
+class SAPGuiElement(GuiComponent):
     """
     A wrapper class for SAP GUI Objects that provides a consistent interface
     for interacting with different types of SAP GUI Components.
