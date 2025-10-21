@@ -91,7 +91,7 @@ class SAPGuiElement(GuiComponent):
             match self.type:
                 case "GuiButton":
                     self.element.press()
-                case "GuiTab":
+                case "GuiTab" | "GuiRadioButton" | "GuiMenu":
                     self.element.select()
                 case "GuiRadioButton":
                     self.element.select()
