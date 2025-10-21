@@ -90,8 +90,8 @@ class SAPGuiEngine:
     ) -> bool:
         """Performs SAP login with provided credentials only if it finds login elements, with all possible exceptions/scenarios handled."""
         try:
-            self.findById(login_screen_elements.username).set_text(username)
-            self.findById(login_screen_elements.password).set_text(password)
+            self.findById(login_screen_elements.username).text = username
+            self.findById(login_screen_elements.password).text = password
             self.sendVKey(VKey.ENTER)
         except Exception as e:
             # Control not found, this means either the login screen is not open or the user is already logged on
