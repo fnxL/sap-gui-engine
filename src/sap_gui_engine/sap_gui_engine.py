@@ -139,7 +139,7 @@ class SAPGuiEngine:
             except Exception as e:
                 # No popup dialogs found, we can continue
                 logger.info(f"No more popup dialogs found: {e}")
-                break
+                return
 
     def fill_table(
         self,
@@ -184,7 +184,7 @@ class SAPGuiEngine:
             )
 
         table = self.session.findById(table_id)
-        if table.type != "GuiTable":
+        if table.type != "GuiTableControl":
             raise ValueError(f"Element {table_id} is not a table")
 
         table = GuiTableControl(table)
@@ -197,6 +197,8 @@ class SAPGuiEngine:
             logger.info("Data contains no items")
             return
 
+        logger.info(f"Total rows: {total_rows}")
+
         col_idx_map = table.get_column_idx_map(
             filter_columns=filter_columns, exclude_columns=exclude_columns
         )
@@ -207,21 +209,20 @@ class SAPGuiEngine:
             start_row = 0 if page == 0 else 1
             current_row = start_row + (i % visible_rows)
 
-            # Check if we need to move to the next page
-            if (current_row > 0) and current_row % visible_rows == 0:
-                page += 1
-                self.send_enter()
-                # Handle all popup dialogs
-                self.handle_popups_until_none()
-                # Refresh table
-                table = GuiTableControl(self.session.findById(table_id))
-
             # Fill row data
             for col, value in row.items():
                 if col in col_idx_map:
                     col_idx = col_idx_map[col]
                     text = "" if value is None else str(value)
                     table.get_cell(current_row, col_idx).text = text
+
+            # Check if we need to move to the next page
+            if (current_row + 1) % visible_rows == 0:
+                page += 1
+                self.send_enter()
+                self.handle_popups_until_none()
+                # Refresh table
+                table = GuiTableControl(self.session.findById(table_id))
 
             i += 1
 
