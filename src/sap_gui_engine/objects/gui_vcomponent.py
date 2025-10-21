@@ -25,7 +25,7 @@ class GuiVComponent(GuiComponent):
 
     def __init__(self, element: Any):
         super().__init__(element)
-        self._element = element # The COM object itself
+        self.element = element # The COM object itself
         self.acc_label_collection = element.AccLabelCollection
         self.acc_text = element.AccText
         self.acc_text_on_request = element.AccTextOnRequest

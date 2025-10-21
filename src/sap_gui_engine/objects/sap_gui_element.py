@@ -55,23 +55,23 @@ class SAPGuiElement(GuiVComponent):
             ComboBoxOptionNotFoundError: If the specified item is not found in a combobox
             ValueError: If there's an error setting the value for a text field
         """
-        if not self._changeable:
-            logger.info(f"Element {self._element.name} is not changeable")
+        if not self.changeable:
+            logger.info(f"Element {self.element.name} is not changeable")
             return
 
         # TODO: Add support for selecting combobox entry by value
-        if self._type == "GuiComboBox":
+        if self.type == "GuiComboBox":
             return self._select_combobox_entry_by_text(value)
 
         try:
-            self._element.Text = value
+            self.element.Text = value
             # Update internal text value after setting
-            self._text = str(self._element.text).strip()
+            self._text = str(self.element.text).strip()
             return
         except Exception as e:
-            logger.error(f"Error setting text for element {self._element.name}: {e}")
+            logger.error(f"Error setting text for element {self.element.name}: {e}")
             raise ValueError(
-                f"Error setting text for element {self._element.name}"
+                f"Error setting text for element {self.element.name}"
             ) from e
 
     def click(self) -> bool:
@@ -88,18 +88,18 @@ class SAPGuiElement(GuiVComponent):
             bool: True after successfully performing the click action
         """
         try:
-            match self._type:
+            match self.type:
                 case "GuiButton":
-                    self._element.press()
+                    self.element.press()
                 case "GuiTab":
-                    self._element.select()
+                    self.element.select()
                 case "GuiRadioButton":
-                    self._element.select()
+                    self.element.select()
                 case "GuiCheckBox":
-                    self._element.selected = not self._element.selected
+                    self.element.selected = not self.element.selected
         except Exception as e:
-            logger.error(f"Error clicking element {self._element.name}: {e}")
-            raise RuntimeError(f"Error clicking element {self._element.name}") from e
+            logger.error(f"Error clicking element {self.element.name}: {e}")
+            raise RuntimeError(f"Error clicking element {self.element.name}") from e
 
         return True
 
@@ -117,7 +117,7 @@ class SAPGuiElement(GuiVComponent):
             ComboBoxOptionNotFoundError: If the specified item is not found in the combobox
         """
         key = None
-        for entry in self._element.entries:
+        for entry in self.element.entries:
             if entry.value.lower() == text.lower():
                 key = entry.key
                 break
@@ -125,7 +125,7 @@ class SAPGuiElement(GuiVComponent):
         if not key:
             raise ComboBoxOptionNotFoundError(f"Entry: {text} not found in combobox")
 
-        self._element.key = key
-        # TODO: Find a way to update/refresh the internal _element / reinstantiate the VComponent
+        self.element.key = key
+        # TODO: Find a way to update/refresh the internal element / reinstantiate the VComponent
 
         return True
