@@ -36,7 +36,7 @@ class SAPGuiElement(GuiVComponent):
         return self._text
 
     @text.setter
-    def text(self, value: str) -> bool:
+    def text(self, value: str):
         """
         Sets or selects a text value for supported SAP element types.
 
@@ -50,9 +50,6 @@ class SAPGuiElement(GuiVComponent):
 
         Args:
             value (str): The value to set or select
-
-        Returns:
-            bool: True if the value was successfully set, False otherwise
 
         Raises:
             ComboBoxOptionNotFoundError: If the specified item is not found in a combobox
