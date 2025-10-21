@@ -1,6 +1,6 @@
 [project]
 name = "sap-gui-engine"
-version = "0.1.2b1"
+version = "0.1.2"
 description = "A framework for interacting with the SAP GUI Scripting API."
 readme = "README.md"
 authors = [
