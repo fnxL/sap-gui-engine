@@ -2,6 +2,7 @@ import logging
 from typing import Any
 from sap_gui_engine.vkey import VKey
 from sap_gui_engine.objects import SAPGuiElement
+from sap_gui_engine.exceptions import TransactionError
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +28,20 @@ class SAPWindowManager:
         except Exception as e:
             logger.error(f"Error sending vkey {key} to window {window}: {e}")
             raise RuntimeError(f"Error sending vkey {key} to window {window}")
+
+    def start_transaction(self, tcode: str, new_transaction: bool = True) -> bool:
+        """Starts a SAP transaction."""
+        if new_transaction:
+            self._session.StartTransaction(tcode)
+        else:
+            self._session.SendCommand(tcode)
+
+        status = self.get_status_info()
+        if status and "does not exist" in status["text"].lower():
+            logger.error(status["text"])
+            raise TransactionError(status["text"])
+
+        return True
 
     def find_element(self, element_id: str):
         """Finds an SAP element by ID."""

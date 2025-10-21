@@ -5,7 +5,7 @@ from typing import Any
 from sap_gui_engine.vkey import VKey
 from sap_gui_engine.objects import SAPGuiElement
 from sap_gui_engine.mappings.login import DEFAULT_LOGIN_ELEMENTS, LoginScreenElements
-from sap_gui_engine.exceptions import LoginError, TransactionError
+from sap_gui_engine.exceptions import LoginError
 from sap_gui_engine.managers import (
     SAPConnectionManager,
     SAPWindowManager,
@@ -77,6 +77,10 @@ class SAPGuiEngine:
         """Extracts document number from status bar when document is created successfully using va01 transaction."""
         return self._window_manager.get_document_number()
 
+    def start_transaction(self, tcode: str, new_transaction: bool = True) -> bool:
+        """Starts a SAP transaction."""
+        return self._window_manager.start_transaction(tcode, new_transaction)
+
     def login(
         self,
         username: str,
@@ -84,10 +88,15 @@ class SAPGuiEngine:
         terminate_other_sessions: bool = True,
         login_screen_elements: LoginScreenElements = DEFAULT_LOGIN_ELEMENTS,
     ) -> bool:
-        """Performs SAP login with provided credentials with all possible exceptions handled."""
-        self.findById(login_screen_elements.username).set_text(username)
-        self.findById(login_screen_elements.password).set_text(password)
-        self.sendVKey(VKey.ENTER)
+        """Performs SAP login with provided credentials only if it finds login elements, with all possible exceptions/scenarios handled."""
+        try:
+            self.findById(login_screen_elements.username).set_text(username)
+            self.findById(login_screen_elements.password).set_text(password)
+            self.sendVKey(VKey.ENTER)
+        except Exception as e:
+            # Control not found, this means either the login screen is not open or the user is already logged on
+            logger.warning(f"User already logged on: {e}")
+            return True
 
         status = self.get_status_info()
         if status and status["type"] == "E":
@@ -114,19 +123,5 @@ class SAPGuiEngine:
         except Exception:
             # The popup dialog did not appear, so we can continue
             pass
-
-        return True
-
-    def start_transaction(self, tcode: str, new_transaction: bool = True) -> bool:
-        """Starts a SAP transaction."""
-        if new_transaction:
-            self._connection_manager.session.StartTransaction(tcode)
-        else:
-            self._connection_manager.session.SendCommand(tcode)
-
-        status = self.get_status_info()
-        if status and "does not exist" in status["text"].lower():
-            logger.error(status["text"])
-            raise TransactionError(status["text"])
 
         return True

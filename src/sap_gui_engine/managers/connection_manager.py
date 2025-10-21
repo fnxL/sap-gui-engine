@@ -73,7 +73,7 @@ class SAPConnectionManager:
         return True
 
     def close_connection(self) -> None:
-        """Closes the current SAP session and connection."""
+        """Closes the current SAP session the script is connected to, but does not close other sessions."""
         if self._session:
             self._session = None
         if self._connection:
