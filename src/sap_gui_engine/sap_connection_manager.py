@@ -1,5 +1,6 @@
 import win32com.client as win32
 import logging
+from .objects import GuiSession
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +11,7 @@ class SAPConnectionManager:
     def __init__(self):
         self._app = None
         self._connection = None
-        self._session = None
+        self._session: GuiSession | None = None
 
     @property
     def session(self):
@@ -37,7 +38,7 @@ class SAPConnectionManager:
         try:
             self._connection = self._app.Children(0)
             if str(self._connection.Description).lower() == connection_name.lower():
-                self._session = self._connection.Children(0)
+                self._session = GuiSession(self._connection.Children(0))
                 logger.info(f"Found existing open connection: {connection_name}")
                 return True
 
@@ -58,7 +59,7 @@ class SAPConnectionManager:
 
             raise ValueError("Please check your connection name.")
 
-        self._session = self._connection.Children(0)
+        self._session = GuiSession(self._connection.Children(0))
         logger.info("Attached to connection session successfully.")
         return True
 

@@ -1,0 +1,46 @@
+import logging
+from typing import Any
+from ..exceptions import TransactionError
+
+logger = logging.getLogger(__name__)
+
+
+class GuiSession:
+    def __init__(self, session: Any):
+        self._session = session
+
+    def maximize(self):
+        """Maximizes the main SAP window"""
+        try:
+            self._session.findById("wnd[0]").maximize()
+        except Exception as e:
+            logger.error(f"Error maximizing window 0: {e}")
+            raise RuntimeError(f"Error maximizing window 0: {e}")
+
+    def start_transaction(self, tcode: str) -> bool:
+        """
+        Starts a new SAP transaction.
+        Args:
+            tcode: Transaction code to start.
+
+        Returns:
+            True if transaction started successfully
+
+        Raises:
+            TransactionError: If transaction code does not exist or Function is not possible.
+
+        Note: This will end any existing transaction without saving your work. Use this with caution.
+        """
+        self._session.StartTransaction(tcode)
+
+        status = self.get_status_info()
+        if status and "does not exist" in status["text"].lower():
+            logger.error(status["text"])
+            raise TransactionError(status["text"])
+
+        return True
+
+    def end_transaction(self) -> bool:
+        """Ends the current SAP transaction. Calling this function has the same effect as SendCommand("/n")."""
+        self._session.EndTransaction()
+        return True

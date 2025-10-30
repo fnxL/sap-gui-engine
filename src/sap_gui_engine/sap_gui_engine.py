@@ -1,5 +1,6 @@
 from pathlib import Path
 from .sap_launcher import SAPLauncher
+from .sap_connection_manager import SAPConnectionManager
 
 
 class SAPGuiEngine:
@@ -15,3 +16,14 @@ class SAPGuiEngine:
 
         self._sap_launcher = SAPLauncher(executable_path, window_title)
         self._sap_launcher.launch_sap()
+        self._connection_manager = SAPConnectionManager()
+        self._connection_manager.open_connection(connection_name)
+
+        @property
+        def session(self):
+            return self._connection_manager.session
+
+        @property
+        def connection_manager(self):
+            """Get the connection manager to access it's methods and properties."""
+            return self._connection_manager
