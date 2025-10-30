@@ -71,3 +71,48 @@ class GuiSession:
         except Exception as e:
             logger.error(f"Error sending vkey {key} to window {window}: {e}")
             raise RuntimeError(f"Error sending vkey {key} to window {window}")
+
+    def get_status_info(self) -> dict[str, Any] | None:
+        """Gets current status bar information."""
+        try:
+            status_bar = self._session.findById("wnd[0]/sbar")
+            return {
+                "id": status_bar.MessageId,
+                "text": status_bar.text,
+                "type": status_bar.MessageType,
+                "number": status_bar.MessageNumber,
+                "is_popup": status_bar.MessageAsPopup,
+                "parameter": status_bar.MessageParameter,
+            }
+        except Exception as e:
+            logger.error(f"Error getting status bar information: {e}")
+            return None
+
+    def get_document_number(self) -> str:
+        """Extracts document number from status bar when document is created successfully using va01 transaction."""
+        status = self.get_status_info()
+        try:
+            return status["text"].split(" ")[3]
+        except Exception as e:
+            logger.error(f"Error getting document number: {status}")
+            logger.error(e)
+            raise e
+
+    def dismiss_popups_until_none(self, key: VKey | int = VKey.ENTER):
+        """
+        Continuously dismisses popup dialogs by sending a specified virtual key (vkey)
+        until no more popups appear. Assumes that the popup dialog is always the second
+        window element (wnd[1]).
+
+        Args:
+            key: Virtual key to send to dismiss the popup dialog.
+
+        """
+        while True:
+            try:
+                self._session.findById("wnd[1]")
+                self.sendVKey(key=key, window=1)
+            except Exception as e:
+                # No popup dialogs found, we can continue
+                logger.debug(f"No more popup dialogs found: {e}")
+                return
