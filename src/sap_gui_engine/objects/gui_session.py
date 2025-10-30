@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 from ..exceptions import TransactionError
+from .gui_component import GuiComponent
 
 logger = logging.getLogger(__name__)
 
@@ -44,3 +45,6 @@ class GuiSession:
         """Ends the current SAP transaction. Calling this function has the same effect as SendCommand("/n")."""
         self._session.EndTransaction()
         return True
+
+    def findById(self, id: str):
+        return GuiComponent(self._session.findById(id))
