@@ -110,8 +110,8 @@ class GuiSession:
         """
         while True:
             try:
-                self._session.findById("wnd[1]")
-                self.sendVKey(key=key, window=1)
+                window = self._session.findById("wnd[1]")
+                window.sendVKey(key.value)
             except Exception as e:
                 # No popup dialogs found, we can continue
                 logger.debug(f"No more popup dialogs found: {e}")
