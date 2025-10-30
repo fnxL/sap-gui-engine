@@ -1,4 +1,5 @@
 from pathlib import Path
+from .sap_launcher import SAPLauncher
 
 
 class SAPGuiEngine:
@@ -11,3 +12,6 @@ class SAPGuiEngine:
     ):
         if isinstance(executable_path, str):
             executable_path = Path(executable_path)
+
+        self._sap_launcher = SAPLauncher(executable_path, window_title)
+        self._sap_launcher.launch_sap()
