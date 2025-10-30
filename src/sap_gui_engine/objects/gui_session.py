@@ -2,6 +2,7 @@ import logging
 from typing import Any
 from ..exceptions import TransactionError
 from .gui_component import GuiComponent
+from ..mappings import VKey
 
 logger = logging.getLogger(__name__)
 
@@ -48,3 +49,25 @@ class GuiSession:
 
     def findById(self, id: str):
         return GuiComponent(self._session.findById(id))
+
+    def sendVKey(self, key: VKey, window: int = 0, times: int = 1) -> bool:
+        """
+        Sends a virtual key to a window.
+        Args:
+            key: Virtual key to send.
+            window: Window to send the key to.
+            times: Number of times to send the key.
+
+        Returns:
+            True if key sent successfully.
+
+        Raises:
+            RuntimeError: If key could not be sent.
+        """
+        try:
+            for _ in range(times):
+                self._session.findById(f"wnd[{window}]").sendVKey(key.value)
+            return True
+        except Exception as e:
+            logger.error(f"Error sending vkey {key} to window {window}: {e}")
+            raise RuntimeError(f"Error sending vkey {key} to window {window}")
