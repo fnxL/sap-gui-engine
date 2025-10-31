@@ -33,11 +33,10 @@ class GuiComponent:
             value (str): The value to set or select
 
         Raises:
-            ComboBoxOptionNotFoundError: If the specified item is not found in a combobox
-            ValueError: If there's an error setting the value for a text field
+            OptionNotFoundError: If the specified item is not found in a combobox
+            RuntimeError: If element is not changeable
         """
         if not self.changeable:
-            logger.debug(f"Element {self.element.name} is not changeable")
             raise RuntimeError(f"Element {self.element.name} is not changeable")
 
         if self.type == "GuiComboBox":
