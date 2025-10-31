@@ -37,8 +37,8 @@ class GuiComponent:
             ValueError: If there's an error setting the value for a text field
         """
         if not self.changeable:
-            logger.info(f"Element {self.element.name} is not changeable")
-            return
+            logger.debug(f"Element {self.element.name} is not changeable")
+            raise RuntimeError(f"Element {self.element.name} is not changeable")
 
         if self.type == "GuiComboBox":
             return self._select_combobox_entry_by_text(value)

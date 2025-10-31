@@ -3,6 +3,7 @@ from typing import Any
 from ..exceptions import TransactionError
 from .gui_component import GuiComponent
 from ..mappings import VKey
+from .utils import get_column_idx_map
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +73,10 @@ class GuiSession:
             logger.error(f"Error sending vkey {key} to window {window}: {e}")
             raise RuntimeError(f"Error sending vkey {key} to window {window}")
 
+    def send_enter(self, window: int = 0) -> bool:
+        """Sends the ENTER key to a window."""
+        return self.sendVKey(VKey.ENTER, window)
+
     def get_status_info(self) -> dict[str, Any] | None:
         """Gets current status bar information."""
         try:
@@ -116,3 +121,106 @@ class GuiSession:
                 # No popup dialogs found, we can continue
                 logger.debug(f"No more popup dialogs found: {e}")
                 return
+
+    def fill_table(
+        self,
+        id: str,
+        data: list[dict[str, Any]],
+        columns: list[str] | None = None,
+        exclude_columns: list[str] | None = None,
+    ):
+        """
+        Populates a specified SAP GUI table with the data from a list of dictionaries.
+
+        Each dictionary in `data` represents a single table row, where keys correspond
+        to column titles and values to cell contents. Column name matching is case-insensitive.
+        Columns that do not exist in the SAP table are ignored, and columns not present
+        in a row’s dictionary remain empty.
+
+        The function automatically handles pagination by sending the ENTER key when the
+        visible portion of the table is filled, and any popup dialogs that may appear.
+
+        Args:
+            id (str):
+            The unique ID of the SAP `GuiTableControl` element to populate.
+
+            data (list[dict[str, Any]]):
+                A list of dictionaries, each representing one row of data to fill into
+                the table.
+
+            columns (list[str], optional):
+                If provided, only these columns will be updated. This allows partial updates
+                of the table. Cannot be used together with `exclude_columns`.
+
+            exclude_columns (list[str], optional):
+                If provided, these columns will be skipped when populating data.
+                Cannot be used together with `columns`.
+
+        Raises:
+            ValueError:
+                If both `columns` and `exclude_columns` are provided.
+            ValueError:
+                If the element specified by `id` is not a `GuiTableControl`.
+
+        Notes:
+            - Column name comparisons are case-insensitive.
+            - Columns or keys that do not match existing table columns are silently ignored.
+            - Pagination is handled automatically via simulated ENTER key presses.
+        """
+
+        if columns and exclude_columns:
+            raise ValueError("Both columns and exclude_columns cannot be used together")
+
+        table = self._session.findById(id)
+
+        if table.type != "GuiTableControl":
+            raise ValueError(f"Element {id} is not a table")
+
+        table.VerticalScrollbar.Position = 0
+        # Refresh table
+        table = self._session.findById(id)
+
+        if not data:
+            logger.info("Data contains no items")
+            return
+
+        total_rows = len(data)
+        logger.info(f"Total rows: {total_rows}")
+
+        col_idx_map = get_column_idx_map(table, columns, exclude_columns)
+
+        visible_rows = table.VisibleRowCount
+
+        i = 0
+        page = 0
+        for row in data:
+            start_row = 0 if page == 0 else 1
+            current_row = start_row + (i % visible_rows)
+
+            # Fill row data
+            for col, value in row.items():
+                col = col.lower()
+                if col in col_idx_map:
+                    col_idx = col_idx_map[col]
+                    text = "" if value is None else str(value)
+                    cell = table.GetCell(current_row, col_idx)
+                    if cell.type != "GuiComboBox":
+                        cell.text = text
+                    else:
+                        # This is a combo box
+                        cell = GuiComponent(cell)
+                        cell.text = text
+
+            # Check if we need to move to the next page
+            if (current_row + 1) % visible_rows == 0:
+                page += 1
+                self.send_enter()
+                self.dismiss_popups_until_none()
+                # Refresh table
+                table = self._session.findById(id)
+
+            i += 1
+
+        # After filling all the rows, final commit to save changes
+        self.send_enter()
+        self.handle_popups_until_none()
