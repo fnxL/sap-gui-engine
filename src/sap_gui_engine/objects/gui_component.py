@@ -14,7 +14,7 @@ class GuiComponent:
 
     @property
     def text(self):
-        return self.text
+        return str(self._text).strip()
 
     @text.setter
     def text(self, value: str):
@@ -93,7 +93,7 @@ class GuiComponent:
         """
         key = None
         for entry in self.element.entries:
-            if entry.value.lower() == text.lower():
+            if str(entry.value).strip().lower() == text.strip().lower():
                 key = entry.key
                 break
 
