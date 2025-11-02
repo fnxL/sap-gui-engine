@@ -47,14 +47,13 @@ class SAPGuiEngine:
             self.session.sendVKey(VKey.ENTER)
         except Exception as e:
             logger.warning(
-                f"Either user is already logged on or login screen is not open: {e}"
+                f"Either user is already logged on or login screen is currently not open: {str(e)}",
             )
             return True
 
         status = self.session.get_status_info()
         if status and status["type"] == "E":
             logger.error(f"Login failed with status: {status}")
-            logger.error(status["text"])
             raise LoginError(status["text"])
 
         logger.info("User login successful")

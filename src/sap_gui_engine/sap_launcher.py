@@ -19,7 +19,6 @@ class SAPLauncher:
         logger.debug("Launching SAP Logon if not already running.")
 
         if not self._executable_path.exists():
-            logger.error(f"SAP executable not found at {self._executable_path}")
             raise FileNotFoundError(
                 f"SAP executable not found at {self._executable_path}"
             )

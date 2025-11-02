@@ -26,8 +26,12 @@ class SAPConnectionManager:
             self._app = sap_gui.GetScriptingEngine
             logger.info("Connected to SAPGUI Scripting Engine.")
         except Exception as e:
-            logger.error(f"Error connecting to SAPGUI Object: {e}")
-            raise Exception("SAP Logon is not running.")
+            logger.error(
+                f"Error connecting to ScriptingEngine: {str(e)}",
+            )
+            raise Exception(
+                "Failed to connect to ScriptingEngine of SAPGUI win32 object. Please check if SAP Logon is currently running."
+            )
 
     def open_connection(self, connection_name: str) -> bool:
         """Tries to connect to existing open connection, if not found then opens new one."""
@@ -37,24 +41,26 @@ class SAPConnectionManager:
         logger.debug("Trying to open existing connection if any.")
         try:
             self._connection = self._app.Children(0)
-            if str(self._connection.Description).lower() == connection_name.lower():
+            if (
+                str(self._connection.Description).strip().lower()
+                == connection_name.strip().lower()
+            ):
                 self._session = GuiSession(self._connection.Children(0))
                 logger.info(f"Found existing open connection: {connection_name}")
                 return True
 
         except Exception as e:
-            print(e)
-            logger.info(
-                f"No existing connection found, opening new connection: {connection_name}"
+            logger.error(str(e))
+            logger.debug(
+                "No existing connection found, opening new connection: {connection_name}"
             )
 
         # Open New Connection Here
         try:
             self._connection = self._app.OpenConnection(connection_name, True)
         except Exception as e:
-            logger.error(f"Error opening connection: {e}")
+            logger.error(f"Error opening new connection: {str(e)}")
             if "'sapgui component' could not be instantiated" in str(e).lower():
-                logger.error("Please check your internet connection.")
                 raise RuntimeError("Please check your internet connection.")
 
             raise ValueError("Please check your connection name.")
