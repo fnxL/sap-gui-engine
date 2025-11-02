@@ -1,11 +1,20 @@
 import logging
-from typing import Any
+from typing import TypedDict, Any
 from ..exceptions import TransactionError
 from .gui_component import GuiComponent
 from ..mappings import VKey
 from .utils import get_column_idx_map
 
 logger = logging.getLogger(__name__)
+
+
+class StatusInfo(TypedDict):
+    id: str
+    text: str | None
+    type: str
+    number: str | None
+    is_popup: bool
+    parameter: str
 
 
 class GuiSession:
@@ -17,8 +26,7 @@ class GuiSession:
         try:
             self._session.findById("wnd[0]").maximize()
         except Exception as e:
-            logger.error(f"Error maximizing window 0: {e}")
-            raise RuntimeError(f"Error maximizing window 0: {e}")
+            raise RuntimeError(f"Error maximizing window 0: {str(e)}")
 
     def start_transaction(self, tcode: str) -> bool:
         """
@@ -49,7 +57,10 @@ class GuiSession:
         return True
 
     def findById(self, id: str):
-        return GuiComponent(self._session.findById(id))
+        try:
+            return GuiComponent(self._session.findById(id))
+        except Exception:
+            raise ValueError(f"The control id {id} could not be found.")
 
     def sendVKey(self, key: VKey, window: int = 0, times: int = 1) -> bool:
         """
@@ -70,14 +81,13 @@ class GuiSession:
                 self._session.findById(f"wnd[{window}]").sendVKey(key.value)
             return True
         except Exception as e:
-            logger.error(f"Error sending vkey {key} to window {window}: {e}")
-            raise RuntimeError(f"Error sending vkey {key} to window {window}")
+            raise RuntimeError(f"Error sending vkey {key} to window {window}: {str(e)}")
 
-    def send_enter(self, window: int = 0) -> bool:
-        """Sends the ENTER key to a window."""
+    def press_enter(self, window: int = 0) -> bool:
+        """Sends the ENTER virtualkey to a window."""
         return self.sendVKey(VKey.ENTER, window)
 
-    def get_status_info(self) -> dict[str, Any] | None:
+    def get_status_info(self) -> StatusInfo | None:
         """Gets current status bar information."""
         try:
             status_bar = self._session.findById("wnd[0]/sbar")
@@ -90,36 +100,34 @@ class GuiSession:
                 "parameter": status_bar.MessageParameter,
             }
         except Exception as e:
-            logger.error(f"Error getting status bar information: {e}")
+            logger.error(f"Error getting status bar information: {str(e)}")
             return None
 
-    def get_document_number(self) -> str:
+    def get_document_number(self) -> str | None:
         """Extracts document number from status bar when document is created successfully using va01 transaction."""
         status = self.get_status_info()
         try:
             return status["text"].split(" ")[3]
         except Exception as e:
-            logger.error(f"Error getting document number: {status}")
-            logger.error(e)
-            raise e
+            logger.error(f"Error getting document number: {status.get('text')}")
+            logger.error(str(e))
+            return None
 
-    def dismiss_popups_until_none(self, key: VKey | int = VKey.ENTER):
+    def dismiss_popups_until_none(self, key: VKey = VKey.ENTER, window: int = 1):
         """
         Continuously dismisses popup dialogs by sending a specified virtual key (vkey)
-        until no more popups appear. Assumes that the popup dialog is always the second
-        window element (wnd[1]).
+        to specified window until no more popups appear.
 
         Args:
             key: Virtual key to send to dismiss the popup dialog.
-
+            window: Window to send the key to.
         """
         while True:
             try:
-                window = self._session.findById("wnd[1]")
-                window.sendVKey(key.value)
+                self._session.findById(f"wnd[{window}]").sendVKey(key.value)
             except Exception as e:
                 # No popup dialogs found, we can continue
-                logger.debug(f"No more popup dialogs found: {e}")
+                logger.error(f"No more popup dialogs found: {str(e)}")
                 return
 
     def fill_table(
