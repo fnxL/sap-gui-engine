@@ -1,6 +1,5 @@
 from typing import Any
-from ..objects import GuiComponent
-
+from .gui_component import GuiComponent
 
 class GuiTableControl:
     def __init__(self, element: Any):

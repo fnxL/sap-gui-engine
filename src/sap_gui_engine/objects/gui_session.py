@@ -1,7 +1,8 @@
 import logging
 from typing import TypedDict, Any
 from ..exceptions import TransactionError
-from ..objects import GuiComponent, GuiTableControl
+from .gui_component import GuiComponent
+from .gui_table_control import GuiTableControl
 from ..mappings import VKey
 from .utils import get_column_idx_map
 
