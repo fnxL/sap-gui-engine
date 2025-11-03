@@ -310,7 +310,7 @@ wheels = [
 
 [[package]]
 name = "sap-gui-engine"
-version = "0.1.1a6"
+version = "0.1.1a7"
 source = { editable = "." }
 dependencies = [
     { name = "pywin32" },

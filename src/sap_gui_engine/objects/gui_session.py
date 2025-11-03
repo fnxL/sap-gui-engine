@@ -142,6 +142,7 @@ class GuiSession:
         data: list[dict[str, Any]],
         columns: list[str] | None = None,
         exclude_columns: list[str] | None = None,
+        set_focus: bool = False,
     ):
         """
         Populates a specified SAP GUI table with the data from a list of dictionaries.
@@ -149,7 +150,7 @@ class GuiSession:
         Each dictionary in `data` represents a single table row, where keys correspond
         to column titles and values to cell contents. Column name matching is case-insensitive.
         Columns that do not exist in the SAP table are ignored, and columns not present
-        in a row’s dictionary remain empty.
+        in a row's dictionary remain empty.
 
         The function automatically handles pagination by sending the ENTER key when the
         visible portion of the table is filled, and any popup dialogs that may appear.
@@ -170,6 +171,10 @@ class GuiSession:
                 If provided, these columns will be skipped when populating data.
                 Cannot be used together with `columns`.
 
+            set_focus (bool, optional):
+                If True, the cell would get focused first before setting the value. Defaults to False.
+                This is useful when you want the cell to get into viewport automatically (horizontally scroll to it automatically) for visual feedback only before setting the value.
+
         Raises:
             ValueError:
                 If both `columns` and `exclude_columns` are provided.
@@ -185,54 +190,57 @@ class GuiSession:
         if columns and exclude_columns:
             raise ValueError("Both columns and exclude_columns cannot be used together")
 
+        if not data:
+            raise ValueError("Data contains no items")
+
         table = self._session.findById(id)
 
         if table.type != "GuiTableControl":
             raise ValueError(f"Element {id} is not a table")
 
-        table.VerticalScrollbar.Position = 0
-        # Refresh table
-        table = self._session.findById(id)
-
-        if not data:
-            raise ValueError("Data contains no items")
-
         total_rows = len(data)
         logger.info(f"Total rows: {total_rows}")
 
-        col_idx_map = get_column_idx_map(table, columns, exclude_columns)
+        column_map = get_column_idx_map(table, columns, exclude_columns)
         visible_rows = table.VisibleRowCount
+        logger.info(f"Visible rows: {visible_rows}")
 
-        i = 0
+        # The current_row_idx should start from 0 if it is the first page, otherwise it should start from 1 always
         page = 0
+        current_row_idx = 0
         for row in data:
-            start_row = 0 if page == 0 else 1
-            current_row = start_row + (i % visible_rows)
+            # Note: I chose to iterate over colum_map, because length of column_map might be lesser than the length of row
+            logger.info(f"Current row index: {current_row_idx} | page: {page}")
 
-            # Fill row data
-            for col, value in row.items():
-                col = col.lower()
-                if col in col_idx_map:
-                    col_idx = col_idx_map[col]
-                    text = "" if value is None else str(value)
-                    cell = table.GetCell(current_row, col_idx)
-                    if cell.type != "GuiComboBox":
-                        cell.text = text
-                    else:
-                        # This is a combo box
+            for col, col_idx in column_map.items():
+                # For each column in the SAP table, check if it exists in the row. Skip if not.
+                if col not in row:
+                    continue
+
+                cell = table.GetCell(current_row_idx, col_idx)
+                if set_focus:
+                    cell.setFocus()
+
+                # Set the cell value if it is not None
+                if row.get(col) is not None:
+                    # Check if the cell is a combobox and convert it to a GuiComponent type to support setting the combobox values
+                    if cell.type == "GuiComboBox":
                         cell = GuiComponent(cell)
-                        cell.text = text
 
-            # Check if we need to move to the next page
-            if (current_row + 1) % visible_rows == 0:
-                page += 1
-                self.send_enter()
+                    cell.text = str(row[col]).strip()
+
+            # If we have filled the last row of the current page, we want to go the next page
+            if current_row_idx == visible_rows - 1:
+                logger.info("Moving to next page")
+                self.press_enter()
                 self.dismiss_popups_until_none()
-                # Refresh table
                 table = self._session.findById(id)
+                page += 1
+                current_row_idx = 1
+                continue
 
-            i += 1
+            current_row_idx += 1
 
-        # After filling all the rows, final commit to save changes
-        self.send_enter()
-        self.handle_popups_until_none()
+        # Afte filling all the rows, press_enter final time to reflect changes
+        self.press_enter()
+        self.dismiss_popups_until_none()
