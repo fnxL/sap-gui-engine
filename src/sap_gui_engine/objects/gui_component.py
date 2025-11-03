@@ -89,8 +89,12 @@ class GuiComponent:
             bool: True if the entry was successfully selected
 
         Raises:
+            ValueError: If the element is not a GuiComboBox
             OptionNotFoundError: If the specified item is not found in the combobox
         """
+        if self.type != "GuiComboBox":
+            raise ValueError(f"Element {self.element.name} is not a combobox")
+
         key = None
         for entry in self.element.entries:
             if str(entry.value).strip().lower() == text.strip().lower():

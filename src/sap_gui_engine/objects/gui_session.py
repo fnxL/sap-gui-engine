@@ -1,7 +1,7 @@
 import logging
 from typing import TypedDict, Any
 from ..exceptions import TransactionError
-from .gui_component import GuiComponent
+from ..objects import GuiComponent, GuiTableControl
 from ..mappings import VKey
 from .utils import get_column_idx_map
 
@@ -58,6 +58,11 @@ class GuiSession:
 
     def findById(self, id: str):
         try:
+            if "tbl" in id:
+                last_part = id.split("/")[-1]
+                if "tbl" in last_part:
+                    return GuiTableControl(self._session.findById(id))
+
             return GuiComponent(self._session.findById(id))
         except Exception:
             raise ValueError(f"The control id {id} could not be found.")
@@ -189,14 +194,12 @@ class GuiSession:
         table = self._session.findById(id)
 
         if not data:
-            logger.info("Data contains no items")
-            return
+            raise ValueError("Data contains no items")
 
         total_rows = len(data)
         logger.info(f"Total rows: {total_rows}")
 
         col_idx_map = get_column_idx_map(table, columns, exclude_columns)
-
         visible_rows = table.VisibleRowCount
 
         i = 0
