@@ -66,7 +66,7 @@ class GuiSession:
 
             return GuiComponent(self._session.findById(id))
         except Exception:
-            raise ValueError(f"The control id {id} could not be found.")
+            raise ValueError(f"The control {id} could not be found.")
 
     def sendVKey(self, key: VKey, window: int = 0, times: int = 1) -> bool:
         """
@@ -119,22 +119,37 @@ class GuiSession:
             logger.error(str(e))
             return None
 
-    def dismiss_popups_until_none(self, key: VKey = VKey.ENTER, window: int = 1):
+    def dismiss_popups(self, key: VKey = VKey.ENTER, window: int = 1):
         """
         Continuously dismisses popup dialogs by sending a specified virtual key (vkey)
         to specified window until no more popups appear.
+
+        Note: This method only works if the window is GuiModalWindow type and isPopupDialog property is True.
 
         Args:
             key: Virtual key to send to dismiss the popup dialog.
             window: Window to send the key to.
         """
+        try:
+            window = self._session.findById(f"wnd[{window}]")
+            if window.type != "GuiModalWindow" or not window.isPopupDialog:
+                return
+        except Exception as e:
+            logger.error(f"Error finding window {window}: {str(e)}")
+
         while True:
             try:
-                self._session.findById(f"wnd[{window}]").sendVKey(key.value)
+                window = self._session.findById(f"wnd[{window}]")
+                if window.type != "GuiModalWindow" or not window.isPopupDialog:
+                    logger.debug(f"Not a popup dialog: {window.text}. Stopping.")
+                    return
+                logger.debug(f"Dismissing popup dialog: {window.text}")
+                window.sendVKey(key.value)
             except Exception as e:
                 # No popup dialogs found, we can continue
-                logger.error(f"No more popup dialogs found: {str(e)}")
-                return
+                logger.error(
+                    f"No more popup dialogs found: {str(e)} | window: {window}"
+                )
 
     def fill_table(
         self,
