@@ -1,6 +1,6 @@
 import logging
 from typing import TypedDict, Any
-from ..exceptions import TransactionError
+from ..exceptions import TransactionError, TableConfigurationError
 from .gui_component import GuiComponent
 from .gui_table_control import GuiTableControl
 from ..mappings import VKey
@@ -130,26 +130,32 @@ class GuiSession:
             key: Virtual key to send to dismiss the popup dialog.
             window: Window to send the key to.
         """
+
+        # Early return if window is not a popup dialog
         try:
-            window = self._session.findById(f"wnd[{window}]")
-            if window.type != "GuiModalWindow" or not window.isPopupDialog:
+            wnd = self._session.findById(f"wnd[{window}]")
+            if wnd.type != "GuiModalWindow" or not wnd.isPopupDialog:
                 return
+            wnd.sendVKey(key.value)
         except Exception as e:
             logger.error(f"Error finding window {window}: {str(e)}")
+            return
 
         while True:
             try:
-                window = self._session.findById(f"wnd[{window}]")
-                if window.type != "GuiModalWindow" or not window.isPopupDialog:
-                    logger.debug(f"Not a popup dialog: {window.text}. Stopping.")
+                wnd = self._session.findById(f"wnd[{window}]")
+                if wnd.type != "GuiModalWindow" or not wnd.isPopupDialog:
+                    logger.debug(f"Not a popup dialog: {wnd.text}. Stopping.")
                     return
-                logger.debug(f"Dismissing popup dialog: {window.text}")
-                window.sendVKey(key.value)
+                logger.debug(f"Dismissing popup dialog: {wnd.text}")
+                wnd.sendVKey(key.value)
+
             except Exception as e:
                 # No popup dialogs found, we can continue
                 logger.error(
                     f"No more popup dialogs found: {str(e)} | window: {window}"
                 )
+                return
 
     def fill_table(
         self,
@@ -248,7 +254,21 @@ class GuiSession:
             if current_row_idx == visible_rows - 1:
                 logger.info("Moving to next page")
                 self.press_enter()
-                self.dismiss_popups_until_none()
+                self.dismiss_popups()
+                # Check for wnd[1] which is not a popup dialog (F8)
+                # TODO: Abstract this into a function
+                try:
+                    wnd = self._session.findById("wnd[1]")
+                    if wnd.type == "GuiModalWindow" and wnd.isPopupDialog:
+                        logger.info(
+                            f"wnd[1] is a modal dialog. This indicates a configuration error. Dialog text: {wnd.PopupDialogText}"
+                        )
+                        raise TableConfigurationError(
+                            f"Error while filling table: {wnd.PopupDialogText}"
+                        )
+                except Exception as e:
+                    pass
+
                 table = self._session.findById(id)
                 page += 1
                 current_row_idx = 1
@@ -258,4 +278,4 @@ class GuiSession:
 
         # Afte filling all the rows, press_enter final time to reflect changes
         self.press_enter()
-        self.dismiss_popups_until_none()
+        self.dismiss_popups()

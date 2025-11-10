@@ -8,3 +8,7 @@ class LoginError(Exception):
 
 class OptionNotFoundError(Exception):
     """Raised when an option is not found in a combobox."""
+
+
+class TableConfigurationError(Exception):
+    """Raised when there is an error while filling the table"""
