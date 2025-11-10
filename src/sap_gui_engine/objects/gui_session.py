@@ -123,7 +123,11 @@ class GuiSession:
         try:
             wnd = self._session.findById(f"wnd[{window}]")
             if wnd.type != "GuiModalWindow" or not wnd.isPopupDialog:
-                return wnd.PopupDialogText
+                dlg_text = str(wnd.PopupDialogText).strip()
+                wnd_title = str(wnd.text).strip()
+                if dlg_text:
+                    return dlg_text
+                return wnd_title
             return None
         except Exception as e:
             logger.error(f"Error finding window {window}: {str(e)}")
