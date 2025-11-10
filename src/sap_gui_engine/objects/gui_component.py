@@ -75,6 +75,12 @@ class GuiComponent:
     def select(self):
         return self.click()
 
+    def pressContextButton(self, item: str):
+        return self.element.pressContextButton(item)
+
+    def selectContextMenuItem(self, item: str):
+        return self.element.selectContextMenuItem(item)
+
     def sendVKey(self, key: int):
         self.element.sendVKey(key)
 
