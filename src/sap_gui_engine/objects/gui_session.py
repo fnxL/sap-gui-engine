@@ -119,6 +119,16 @@ class GuiSession:
             logger.error(str(e))
             return None
 
+    def check_for_error_dialog(self, window: int = 1) -> str | None:
+        try:
+            wnd = self._session.findById(f"wnd[{window}]")
+            if wnd.type != "GuiModalWindow" or not wnd.isPopupDialog:
+                return wnd.PopupDialogText
+            return None
+        except Exception as e:
+            logger.error(f"Error finding window {window}: {str(e)}")
+            return False
+
     def dismiss_popups(self, key: VKey = VKey.ENTER, window: int = 1):
         """
         Continuously dismisses popup dialogs by sending a specified virtual key (vkey)
@@ -257,18 +267,12 @@ class GuiSession:
                 self.dismiss_popups()
                 # Check for wnd[1] which is not a popup dialog (F8)
                 # TODO: Abstract this into a function
-                try:
-                    wnd = self._session.findById("wnd[1]")
-                    if wnd.type == "GuiModalWindow" and wnd.isPopupDialog:
-                        logger.info(
-                            f"wnd[1] is a modal dialog. This indicates a configuration error. Dialog text: {wnd.PopupDialogText}"
-                        )
-                        raise TableConfigurationError(
-                            f"Error while filling table: {wnd.PopupDialogText}"
-                        )
-                except Exception as e:
-                    pass
 
+                error_dialog = self.check_for_error_dialog()
+                if error_dialog:
+                    raise TableConfigurationError(
+                        f"Error while filling table: {error_dialog}"
+                    )
                 table = self._session.findById(id)
                 page += 1
                 current_row_idx = 1
