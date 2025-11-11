@@ -1,5 +1,6 @@
 import logging
 from typing import TypedDict, Any
+from pathlib import Path
 from ..exceptions import TransactionError, TableConfigurationError
 from .gui_component import GuiComponent
 from .gui_table_control import GuiTableControl
@@ -7,6 +8,14 @@ from ..mappings import VKey
 from .utils import get_column_idx_map
 
 logger = logging.getLogger(__name__)
+
+IMAGE_FORMAT_MAP = {
+    "bmp": 0,
+    "jpg": 1,
+    "png": 2,
+    "gif": 3,
+    "tiff": 4,
+}
 
 
 class StatusInfo(TypedDict):
@@ -118,6 +127,18 @@ class GuiSession:
             logger.error(f"Error getting document number: {status.get('text')}")
             logger.error(str(e))
             return None
+
+    def take_screenshot(
+        self, file_path: str | Path, window: int = 0, format: str = "png"
+    ):
+        """Takes a screenshot of the specified window and saves it to the specified file path."""
+        format_int_value = IMAGE_FORMAT_MAP.get(format.lower())
+        if not format_int_value:
+            raise ValueError(f"Invalid image format: {format}")
+        try:
+            self._session.findById(f"wnd[{window}]").HardCopy(str(file_path), format)
+        except Exception as e:
+            raise RuntimeError(f"Error taking screenshot: {str(e)}")
 
     def check_for_error_dialog(self, window: int = 1) -> str | None:
         try:
