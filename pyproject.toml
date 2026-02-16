@@ -1,0 +1,30 @@
+[project]
+name = "sap-gui-engine"
+version = "0.2.0"
+description = "A framework for interacting with the SAP GUI Scripting API."
+readme = "README.md"
+authors = [
+    { name = "fnxL", email = "48607132+fnxL@users.noreply.github.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "pywin32>=311",
+    "pywinauto>=0.6.9",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+
+[project.urls]
+Homepage = "https://github.com/fnxL/sap-gui-engine"
+Issues = "https://github.com/fnxL/sap-gui-engine/issues"
+
+[build-system]
+requires = ["uv_build>=0.9.4,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pydantic-settings>=2.11.0",
+    "pytest>=8.4.2",
+    "pytest-order>=1.3.0",
+]
