@@ -1,18 +1,35 @@
 [project]
 name = "sap-gui-engine"
 version = "0.1.0"
-description = "Add your description here"
+description = "Python framework for SAP GUI Scripting/Automation"
 readme = "README.md"
-authors = [
-    { name = "fnxL", email = "48607132+fnxL@users.noreply.github.com" }
-]
+authors = [{ name = "fnxL", email = "48607132+fnxL@users.noreply.github.com" }]
 requires-python = ">=3.11"
-dependencies = [
-    "pywinauto>=0.6.9",
+dependencies = ["pywinauto>=0.6.9"]
+license = { file = "LICENSE" }
+keywords = [
+    "sap",
+    "sap automation",
+    "sap gui",
+    "sap gui automation",
+    "sap gui scripting",
+    "sap gui scripting api",
+    "sap gui api",
+    "sap scripting automation",
+    "sap scripting",
+    "enterprise automation",
 ]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: Microsoft :: Windows",
+    "License :: Other/Proprietary License",
+    "Topic :: Software Development :: Libraries",
+]
+
 
 [project.urls]
 Homepage = "https://github.com/fnxL/sap-gui-engine"
+Repository = "https://github.com/fnxL/sap-gui-engine"
 Issues = "https://github.com/fnxL/sap-gui-engine/issues"
 
 
@@ -21,6 +38,4 @@ requires = ["uv_build>=0.10.12,<0.11.0"]
 build-backend = "uv_build"
 
 [dependency-groups]
-dev = [
-    "pytest>=9.0.2",
-]
+dev = ["pytest>=9.0.2"]
