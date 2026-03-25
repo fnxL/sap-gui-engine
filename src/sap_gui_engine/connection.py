@@ -22,8 +22,6 @@ MAX_SESSIONS = 6
 
 
 class SAPConnection:
-    MAX_SESSIONS = 6
-
     def __init__(
         self,
         connection_name: str,
