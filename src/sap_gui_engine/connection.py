@@ -56,7 +56,7 @@ class SAPConnection:
         # Check if connection already exists with same username.
         # If not found, create new connection, login and return
         self._init_com()
-        self.connect_to_engine()
+        self._connect_to_engine()
         if not self._app:
             raise SAPConnectionError("Scripting engine not available")
 
@@ -171,7 +171,7 @@ class SAPConnection:
         session.dismiss_popups()
         return True
 
-    def connect_to_engine(self):
+    def _connect_to_engine(self):
         try:
             self._sap_gui_auto = win32.GetObject("SAPGUI")
             self._app = self._sap_gui_auto.GetScriptingEngine
