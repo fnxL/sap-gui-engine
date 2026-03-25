@@ -18,6 +18,9 @@ class SAPLoginScreenElements:
     password: str = "wnd[0]/usr/pwdRSYST-BCODE"
 
 
+MAX_SESSIONS = 6
+
+
 class SAPConnection:
     MAX_SESSIONS = 6
 
@@ -27,6 +30,7 @@ class SAPConnection:
         username: str,
         password: str,
         client: str | None = None,
+        max_sessions: int = MAX_SESSIONS,
         language: str = "EN",
         executable_path: str = r"C:\Program Files\SAP\FrontEnd\SAPGUI\saplogon.exe",
         window_title_re: str = "SAP Logon 800",
@@ -38,6 +42,7 @@ class SAPConnection:
         self.language = language
         self.executable_path = executable_path
         self.window_title_re = window_title_re
+        self.max_sessions = max_sessions
 
         self._sap_gui_auto = None
         self._app = None
@@ -73,7 +78,7 @@ class SAPConnection:
     def create_new_session(self, conn) -> SAPSession:
         logger.info(f"Creating new session for user: {self.username}")
         sessions = conn.Children.Count
-        if sessions >= self.MAX_SESSIONS:
+        if sessions >= self.max_sessions:
             raise SAPConnectionError("Max sessions reached")
 
         sess = conn.Children(0)
