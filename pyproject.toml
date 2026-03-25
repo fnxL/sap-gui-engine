@@ -1,0 +1,26 @@
+[project]
+name = "sap-gui-engine"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "fnxL", email = "48607132+fnxL@users.noreply.github.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "pywinauto>=0.6.9",
+]
+
+[project.urls]
+Homepage = "https://github.com/fnxL/sap-gui-engine"
+Issues = "https://github.com/fnxL/sap-gui-engine/issues"
+
+
+[build-system]
+requires = ["uv_build>=0.10.12,<0.11.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
