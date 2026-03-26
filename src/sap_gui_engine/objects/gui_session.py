@@ -168,8 +168,8 @@ class GuiSession:
 
     def raise_for_status(
         self,
-        exception: Exception = SAPStatusBarError,
         message: str | None = None,
+        exception: Exception = SAPStatusBarError,
     ) -> StatusbarMsg:
         """Checks the status bar for error message type and raises the given exception
 
@@ -181,7 +181,7 @@ class GuiSession:
             Optional message to prepend to the error message, by default None
         """
         sbar = self.get_statusbar_msg()
-        if not sbar["type"] == "E":
+        if not sbar.type == "E":
             return sbar
 
         error_message = f"{message}: {sbar['text']}" if message else sbar["text"]
