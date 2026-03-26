@@ -5,8 +5,7 @@ from dataclasses import dataclass
 class StatusbarMsg:
     id: str
     type: str
-    text: str | None
-    number: str | None
-    has_longtext: str | None
+    text: str
+    number: str
+    has_longtext: int
     is_popup: bool | None
-    parameter: str | None

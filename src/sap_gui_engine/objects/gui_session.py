@@ -158,11 +158,11 @@ class GuiSession:
 
         return StatusbarMsg(
             id=sbar.MessageId,
+            number=sbar.MessageNumber,
             text=sbar.text,
             type=sbar.MessageType,
             has_longtext=sbar.MessageHasLongtext,
             is_popup=sbar.MessageAsPopup,
-            parameter=sbar.MessageParameter,
         )
 
     def raise_for_status(
