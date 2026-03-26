@@ -9,6 +9,7 @@ from sap_gui_engine.exceptions import (
 )
 
 from .gui_vcomponent import GuiVComponent
+from .session_info import SessionInfo
 from .statusbar_msg import StatusbarMsg
 
 logger = logging.getLogger(__name__)
@@ -240,5 +241,29 @@ class GuiSession:
         self.session.EndTransaction()
 
     def get_session_info(self):
-
-        pass
+        info = self._com_session.info
+        return SessionInfo(
+            application_server=info.ApplicationServer,
+            client=info.Client,
+            codepage=info.Codepage,
+            flushes=info.Flushes,
+            group=info.Group,
+            gui_codepage=info.GuiCodepage,
+            i18n_mode=info.I18nMode,
+            iterpretation_time=info.InterpretationTime,
+            is_low_speed_connection=info.IsLowSpeedConnection,
+            language=info.Language,
+            message_server=info.MessageServer,
+            program=info.Program,
+            response_time=info.ResponseTime,
+            round_trips=info.RoundTrips,
+            screen_number=info.ScreenNumber,
+            scripting_mode_read_only=info.ScriptingModeReadOnly,
+            scripting_mode_recording_disabled=info.ScriptingModeRecordingDisabled,
+            session_number=info.SessionNumber,
+            system_name=info.SystemName,
+            system_session_id=info.SystemSessionId,
+            transaction=info.Transaction,
+            ui_guideline=info.UI_GUIDELINE,
+            user=info.User,
+        )
