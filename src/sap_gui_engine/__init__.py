@@ -1,2 +1,2 @@
 from .connection import SAPConnection
-from .session import SAPSession
+from .objects import GuiSession

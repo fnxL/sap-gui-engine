@@ -1,4 +1,5 @@
 import logging
+import time
 from dataclasses import dataclass
 
 import pythoncom
@@ -6,7 +7,7 @@ import win32com.client as win32
 
 from sap_gui_engine.constants import ControlID
 from sap_gui_engine.exceptions import SAPConnectionError, SAPLoginError
-from sap_gui_engine.session import SAPSession
+from sap_gui_engine.objects import GuiSession
 from sap_gui_engine.utils import launch_application
 
 logger = logging.getLogger(__name__)
@@ -52,7 +53,7 @@ class SAPConnection:
     def _uninit_com(self):
         pythoncom.CoUninitialize()
 
-    def open_connection(self) -> SAPSession:
+    def open_connection(self) -> GuiSession:
         # Check if connection already exists with same username.
         # If not found, create new connection, login and return
         self._init_com()
@@ -64,24 +65,28 @@ class SAPConnection:
         if existing:
             logger.info(f"Found existing connection for user: {self.username}")
             # Create new session and return the session
-            return self.create_new_session(existing)
+            return self._create_new_session(existing)
 
         logger.info(f"No existing connection found for user: {self.username}")
         logger.info(f"Creating new connection for user: {self.username}")
         connection = self._app.OpenConnection(self.connection_name, True)
-        session = SAPSession(connection.Children(0))
-        self.login(session)
+        session = GuiSession(connection.Children(0))
+        self._login(session)
         return session
 
-    def create_new_session(self, conn) -> SAPSession:
-        logger.info(f"Creating new session for user: {self.username}")
-        sessions = conn.Children.Count
-        if sessions >= self.max_sessions:
+    def _create_new_session(self, connection) -> GuiSession:
+        session_count = connection.Children.Count
+        if session_count >= self.max_sessions:
             raise SAPConnectionError("Max sessions reached")
 
-        sess = conn.Children(0)
-        session = sess.CreateSession()
-        return SAPSession(session)
+        logger.info(f"Current session count: {session_count}")
+        logger.debug(f"Creating new session for user: {self.username}")
+        sess = connection.Children(0)
+        sess.CreateSession()
+        time.sleep(3)
+        logger.debug(f"New session count: {connection.Children.Count}")
+        new_session = connection.Children(connection.Children.Count - 1)
+        return GuiSession(new_session)
 
     def is_connection_open(self):
         logger.info(f"Checking for existing connection for user: {self.username}")
@@ -109,9 +114,9 @@ class SAPConnection:
         return None
 
     # TODO: Implement automatic password change and update password in keyring.
-    def login(
+    def _login(
         self,
-        session: SAPSession,
+        session: GuiSession,
         terminate_other_sessions: bool = True,
     ) -> bool:
         """Performs SAP login with the provided credentials. It handles multiple login attempts, incorrect password attempts, terminates other sessions logged in other computers.
