@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, TypedDict
+from typing import Optional
 
 from sap_gui_engine.constants import ControlID, GuiObject, VKey
 from sap_gui_engine.exceptions import (
@@ -9,19 +9,9 @@ from sap_gui_engine.exceptions import (
 )
 
 from .gui_vcomponent import GuiVComponent
+from .statusbar_msg import StatusbarMsg
 
 logger = logging.getLogger(__name__)
-
-
-class StatusbarInfo(TypedDict):
-    """Structure for SAP Status Bar information."""
-
-    id: str
-    text: str | None
-    type: str
-    number: str | None
-    is_popup: bool
-    parameter: str
 
 
 class GuiSession:
@@ -148,38 +138,38 @@ class GuiSession:
                 logger.debug("No more popup dialogs found. Stopping.")
                 break
 
-    def get_statusbar_info(self) -> StatusbarInfo:
+    def get_statusbar_msg(self) -> StatusbarMsg:
         """
-        Retrieves current status bar details.
+        Retreives the current status bar message.
 
         Returns
         -------
-        StatusbarInfo
-            A dictionary containing the status bar information.
+        StatusbarMsg
+            The StatusbarMsg dataclass
 
         Raises
         ------
         SAPElementNotFound
-            If the status bar is not found
+            If the statusbar is not found in the window
         """
         sbar = self.find_by_id(ControlID.STATUS_BAR, False)
         if not sbar:
             raise SAPElementNotFound("Status bar not found")
 
-        return {
-            "id": sbar.MessageId,
-            "text": sbar.text,
-            "type": sbar.MessageType,
-            "number": sbar.MessageNumber,
-            "is_popup": sbar.MessageAsPopup,
-            "parameter": sbar.MessageParameter,
-        }
+        return StatusbarMsg(
+            id=sbar.MessageId,
+            text=sbar.text,
+            type=sbar.MessageType,
+            has_longtext=sbar.MessageHasLongtext,
+            is_popup=sbar.MessageAsPopup,
+            parameter=sbar.MessageParameter,
+        )
 
     def raise_for_status(
         self,
         exception: Exception = SAPStatusBarError,
         message: str | None = None,
-    ) -> StatusbarInfo:
+    ) -> StatusbarMsg:
         """Checks the status bar for error message type and raises the given exception
 
         Parameters
@@ -189,7 +179,7 @@ class GuiSession:
         message : str | None, optional
             Optional message to prepend to the error message, by default None
         """
-        sbar = self.get_statusbar_info()
+        sbar = self.get_statusbar_msg()
         if not sbar["type"] == "E":
             return sbar
 
@@ -241,10 +231,14 @@ class GuiSession:
         self.session.StartTransaction(tcode)
 
         # Check if tcode was valid
-        status = self.get_statusbar_info()
-        if status and "does not exist" in status["text"].lower():
+        status = self.get_statusbar_msg()
+        if status.text and "does not exist" in status.text.lower():
             raise SAPTransactionError(f"Transaction {tcode} failed: {status['text']}")
 
     def end_transaction(self) -> None:
         """Ends the current SAP transaction. (equivalent to /n)"""
         self.session.EndTransaction()
+
+    def get_session_info(self):
+
+        pass
