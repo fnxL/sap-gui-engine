@@ -47,16 +47,43 @@ class GuiVComponent:
         """
         self.set_text(value, raise_error=True)
 
-    def set_text(self, value: Any, raise_error: bool = False) -> bool:
+    def get_text(self, strip_text: bool = True) -> str:
+        """
+        Gets the text property of the element
+
+        Parameters
+        ----------
+        strip_text : bool, optional
+            Wehther to strip the leading and trailling whitespaces of the text, by default True
+
+        Returns
+        -------
+        str
+        """
+        if strip_text:
+            return str(self.text).strip()
+
+        return self.text
+
+    def set_text(
+        self,
+        value: Any,
+        raise_error: bool = False,
+        date_format: str = "%d.%m.%Y",
+        set_focus: bool = False,
+        strip_value: bool = True,
+    ) -> bool:
         """
         Sets the text or selects a value for the component
-        If value is of type date, it will be converted to a string format "dd.mm.yyyy" supported by SAP
+        If value is of type date, it will be converted to a string format "dd.mm.yyyy" by default as supported by SAP. Pass date_format parameter to convert to custom format.
+
+        If the length of the value exceeds the maxLength property of the element, it will be truncated to fit maxLength characters of the element.
 
         **Supported element types:**
             - GuiTextField
             - GuiCTextField
             - GuiPasswordField
-            - GuiComboBox - Selects an item from the combobox by value
+            - GuiComboBox - Selects an item from the combobox by value (case-insensitive)
 
 
         Parameters
@@ -64,14 +91,24 @@ class GuiVComponent:
         value : Any
             The string value or date object to set or select
         raise_error : bool, optional
-            If true, raises exception when the element is read-only, by default False
+            If true, raises exception when the element is read-only (not changeable), by default False
+        date_format : str, optional
+            The format to use when converting a date object to a string, by default "%d.%m.%Y"
+        set_focus : bool, optional
+            If true, sets focus to the element before setting the text, by default False
+        strip_value: bool, optional
+            If true, strips leading and trailing whitespaces from the value before setting it, by default True
 
         Returns
         -------
         bool
             True if the text was set successfully, False otherwise
-        """
 
+        Raises
+        ------
+        SAPElementNotChangeable
+            If the element is not changeable and raise_error is True
+        """
         if not self.changeable:
             msg = f"Element {self.name} ({self.type}) is not changeable."
             if raise_error:
@@ -81,19 +118,23 @@ class GuiVComponent:
             return False
 
         if isinstance(value, date):
-            value = value.strftime("%d.%m.%Y")
+            value = value.strftime(date_format)
 
-        clean_value = str(value).strip()
+        if strip_value:
+            value = str(value).strip()
 
         if self.type == GuiObject.COMBO_BOX:
-            return self._select_combobox_entry(clean_value)
+            return self._select_combobox_entry(value)
 
         max_length = getattr(self._com_element, "maxLength", None)
 
-        if max_length and len(clean_value) > max_length:
-            clean_value = clean_value[:max_length]
+        if max_length and len(value) > max_length:
+            value = value[:max_length]
 
-        self._com_element.text = clean_value
+        if set_focus:
+            self._com_element.SetFocus()
+
+        self._com_element.text = value
         return True
 
     def _select_combobox_entry(self, text: str) -> bool:
