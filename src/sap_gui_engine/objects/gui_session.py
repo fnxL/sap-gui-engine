@@ -42,7 +42,16 @@ class GuiSession:
         return self._com_session
 
     def close_session(self):
-        pass
+        self._com_session.SendCommand("/i")
+        # If this is not the last session, the session closes here immediately and _com_session object becomes unknown, so find_by_id will throw an
+        try:
+            dlg = self.find_by_id("wnd[1]/usr/btnSPOP-OPTION1", False)
+            if dlg:
+                dlg.click()
+        except Exception:
+            # This is expected if the session is not the last one.
+            pass
+        return
 
     def find_by_id(
         self,
