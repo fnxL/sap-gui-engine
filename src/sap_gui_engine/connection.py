@@ -68,15 +68,24 @@ class SAPConnection:
             existing = self.is_connection_open()
             if existing:
                 logger.info(f"Found existing connection for user: {self.username}")
+                session_count = existing.Children.Count
+                if session_count == 0:
+                    # This ideally should never be possible since connection is already open
+                    # In this case, assuming the connection is corrupt and we need to close this connection and establish a new one.
+                    existing.CloseConnection()
+                    return self.create_new_connection()
                 # Create new session and return the session
                 return self._create_new_session(existing)
 
-            logger.info(f"No existing connection found for user: {self.username}")
-            logger.info(f"Creating new connection for user: {self.username}")
-            connection = self._app.OpenConnection(self.connection_name, True)
-            session = GuiSession(connection.Children(0))
-            self._login(session)
-            return session
+            return self.create_new_connection()
+
+    def create_new_connection(self) -> GuiSession:
+        logger.info(f"No existing connection found for user: {self.username}")
+        logger.info(f"Creating new connection for user: {self.username}")
+        connection = self._app.OpenConnection(self.connection_name, True)
+        session = GuiSession(connection.Children(0))
+        self._login(session)
+        return session
 
     def _create_new_session(self, connection) -> GuiSession:
         session_count = connection.Children.Count
