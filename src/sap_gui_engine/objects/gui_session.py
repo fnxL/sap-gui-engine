@@ -238,7 +238,7 @@ class GuiSession:
 
         """
         logger.debug(f"Starting transaction: {tcode}")
-        self.session.StartTransaction(tcode)
+        self._com_session.StartTransaction(tcode)
 
         # Check if tcode was valid
         status = self.get_statusbar_msg()
@@ -247,7 +247,7 @@ class GuiSession:
 
     def end_transaction(self) -> None:
         """Ends the current SAP transaction. (equivalent to /n)"""
-        self.session.EndTransaction()
+        self._com_session.EndTransaction()
 
     def get_session_info(self):
         info = self._com_session.info
