@@ -9,6 +9,7 @@ from sap_gui_engine.constants import ControlID
 from sap_gui_engine.exceptions import SAPConnectionError, SAPLoginError
 from sap_gui_engine.objects import GuiSession
 from sap_gui_engine.utils import launch_application
+from sap_gui_engine.utils.lock_manager import get_global_lock_manager
 
 logger = logging.getLogger(__name__)
 
@@ -56,23 +57,26 @@ class SAPConnection:
     def open_connection(self) -> GuiSession:
         # Check if connection already exists with same username.
         # If not found, create new connection, login and return
-        self._init_com()
-        self._connect_to_engine()
-        if not self._app:
-            raise SAPConnectionError("Scripting engine not available")
+        # Use lock to ensure only one worker can call open_connection at a time
+        lock_manager = get_global_lock_manager()
+        with lock_manager:
+            self._init_com()
+            self._connect_to_engine()
+            if not self._app:
+                raise SAPConnectionError("Scripting engine not available")
 
-        existing = self.is_connection_open()
-        if existing:
-            logger.info(f"Found existing connection for user: {self.username}")
-            # Create new session and return the session
-            return self._create_new_session(existing)
+            existing = self.is_connection_open()
+            if existing:
+                logger.info(f"Found existing connection for user: {self.username}")
+                # Create new session and return the session
+                return self._create_new_session(existing)
 
-        logger.info(f"No existing connection found for user: {self.username}")
-        logger.info(f"Creating new connection for user: {self.username}")
-        connection = self._app.OpenConnection(self.connection_name, True)
-        session = GuiSession(connection.Children(0))
-        self._login(session)
-        return session
+            logger.info(f"No existing connection found for user: {self.username}")
+            logger.info(f"Creating new connection for user: {self.username}")
+            connection = self._app.OpenConnection(self.connection_name, True)
+            session = GuiSession(connection.Children(0))
+            self._login(session)
+            return session
 
     def _create_new_session(self, connection) -> GuiSession:
         session_count = connection.Children.Count
@@ -149,10 +153,13 @@ class SAPConnection:
         session.press_enter()
 
         # Check for immediate login errors (e.g., invalid credentials)
-        status = session.raise_for_status(SAPLoginError, message="Login failed")
+        status = session.raise_for_status(
+            message="Login failed",
+            exception=SAPLoginError,
+        )
 
         # Handle multi-logon
-        if status and "already logged on" in (status.get("text") or "").lower():
+        if status.text and "already logged on" in status.text.lower():
             logger.info("Multi-logon detected.")
             if not terminate_other_sessions:
                 raise SAPLoginError("User already logged on in some other session.")
