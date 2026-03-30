@@ -33,13 +33,19 @@ class GuiVComponent:
 
     @property
     def name(self) -> str:
-        if hasattr(self._com_element, "name"):
-            return self._com_element.name
+        if hasattr(self._com_element, "Name"):
+            return self._com_element.Name
 
     @property
     def type(self) -> str:
-        if hasattr(self._com_element, "type"):
-            return self._com_element.type
+        if hasattr(self._com_element, "Type"):
+            return self._com_element.Type
+
+    @property
+    def changeable(self) -> bool:
+        if hasattr(self._com_element, "Changeable"):
+            return self._com_element.Changeable
+        return False
 
     @property
     def text(self) -> str:
