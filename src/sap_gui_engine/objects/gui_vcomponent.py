@@ -151,6 +151,10 @@ class GuiVComponent:
         """
         Alias for set_text for selecting combobox entries.
         """
+        if self.type != GuiObject.COMBO_BOX:
+            raise SAPElementTypeMismatch(
+                f"Element {self.name} is not a combobox. It is a {self.type}"
+            )
         return self.set_text(
             value=entry_name,
             raise_error=raise_error,
