@@ -47,6 +47,23 @@ class GuiVComponent:
             return self._com_element.Changeable
         return False
 
+    def visualize(self, value: bool) -> bool:
+        """
+        Calling this method of a component will display a red frame around the specified component if the value parameter is True.
+
+        Parameters
+        ----------
+        value : bool
+            Whether to visualize the element
+
+        Returns
+        -------
+        bool
+            True if the operation was successful, False otherwise.
+        """
+        if hasattr(self._com_element, "Visualize"):
+            return bool(self._com_element.Visualize(value))
+
     @property
     def text(self) -> str:
         """Gets the text property, stripped of whitespace."""
