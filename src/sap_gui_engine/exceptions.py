@@ -32,3 +32,6 @@ class SAPLoginError(SAPError):
 
 class SAPElementTypeMismatch(SAPError):
     """Raised when the element type does not match the expected type."""
+
+class SAPTableConfigurationError(SAPError):
+    """Raised when there is a mismatch or error in table configuration/population."""
