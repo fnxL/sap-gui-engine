@@ -3,7 +3,11 @@ from datetime import date
 from typing import Any
 
 from sap_gui_engine.constants import GuiObject, VKey
-from sap_gui_engine.exceptions import SAPComboBoxOptionNotFound, SAPElementNotChangeable
+from sap_gui_engine.exceptions import (
+    SAPComboBoxOptionNotFound,
+    SAPElementNotChangeable,
+    SAPElementTypeMismatch,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -136,6 +140,49 @@ class GuiVComponent:
 
         self._com_element.text = value
         return True
+
+    def select_combobox(
+        self,
+        entry_name: str,
+        raise_error: bool = False,
+        set_focus: bool = False,
+        strip_value: bool = True,
+    ) -> bool:
+        """
+        Alias for set_text for selecting combobox entries.
+        """
+        return self.set_text(
+            value=entry_name,
+            raise_error=raise_error,
+            set_focus=set_focus,
+            strip_value=strip_value,
+        )
+
+    def get_checkbox_state(self) -> bool:
+        """
+        Returns the state of the checkbox field
+
+        Returns
+        -------
+        bool
+            True, if checkbox is selected, False otherwise.
+
+        Raises
+        ------
+        SAPElementTypeMismatch
+            If the element is not a checkbox.
+        """
+        if self.type != GuiObject.CHECKBOX:
+            raise SAPElementTypeMismatch(
+                f"Element {self.name} is not a checkbox. It is a {self.type}"
+            )
+        return bool(self._com_element.selected)
+
+    def set_focus(self):
+        """
+        Sets focus on the element
+        """
+        self._com_element.SetFocus()
 
     def _select_combobox_entry(self, text: str) -> bool:
         """

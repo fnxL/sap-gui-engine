@@ -21,8 +21,14 @@ class SAPComboBoxOptionNotFound(SAPError):
 class SAPStatusBarError(SAPError):
     """Raised when there is an error in the status bar."""
 
+
 class SAPTransactionError(SAPError):
     """Raised when a transaction fails to start or encounters a critical error."""
 
+
 class SAPLoginError(SAPError):
     """Raised when the login process fails."""
+
+
+class SAPElementTypeMismatch(SAPError):
+    """Raised when the element type does not match the expected type."""
