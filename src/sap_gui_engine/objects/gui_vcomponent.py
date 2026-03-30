@@ -32,6 +32,16 @@ class GuiVComponent:
         return self._com_element
 
     @property
+    def name(self) -> str:
+        if hasattr(self._com_element, "name"):
+            return self._com_element.name
+
+    @property
+    def type(self) -> str:
+        if hasattr(self._com_element, "type"):
+            return self._com_element.type
+
+    @property
     def text(self) -> str:
         """Gets the text property, stripped of whitespace."""
         # Use getattr to avoid failing if .text doesn't exist (though it usually does)
