@@ -37,12 +37,14 @@ class GuiTableControl:
         """
         Set attributes on the GuiTableControl instance or delegate to the underlying _com_element if the attribute doesn't exist on the instance itself.
         """
-        # Handle setting of internal attributes and class-defined attributes normally
-        if name.startswith("_") or hasattr(type(self), name):
-            super().__setattr__(name, value)
-        else:
-            # Delegate to the underlying _com_element
-            setattr(self._com_element, name, value)
+        try:
+            element = object.__getattribute__(self, "_element")
+            if hasattr(element, name):
+                setattr(element, name, value)
+        except AttributeError:
+            # Fallback
+            pass
+        object.__setattr__(self, name, value)
 
     @property
     def visible_rows(self) -> int:
@@ -106,6 +108,7 @@ class GuiTableControl:
         data: list[dict[str, Any]],
         headers: list[str] | None = None,
         exclude_headers: list[str] | None = None,
+        case_sensitive: bool = False,
         set_focus: bool = False,
     ):
         """
@@ -124,6 +127,8 @@ class GuiTableControl:
             List of headers to exclude. If None, no headers are excluded, by default None
         set_focus : bool, optional
             Focus on the element before filling/overwriting, by default False
+        case_sensitive: bool, optional
+            Whether to match headers case-sensitively, by default False. If False, then the keys in the data and sap table header names are matched case-insensitively.
 
         Raises
         ------
@@ -138,7 +143,16 @@ class GuiTableControl:
         if not data:
             raise ValueError("Provided Data is Empty.")
 
-        self.headers = self.get_table_headers(headers, exclude_headers)
+        self.headers = self.get_table_headers(
+            headers,
+            exclude_headers,
+            not case_sensitive,
+        )
+
+        logger.debug(f"Table headers: {self.headers}")
+        if not case_sensitive:
+            # Make all the keys in the data to lower case
+            data = [{k.lower(): v for k, v in row.items()} for row in data]
 
         # Check if table is empty (scroll max == 0 usually implies empty or single page)
         is_table_empty = self.VerticalScrollbar.Maximum == 0
