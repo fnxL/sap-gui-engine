@@ -198,7 +198,7 @@ class GuiSession:
         if not sbar.type == "E":
             return sbar
 
-        error_message = f"{message}: {sbar['text']}" if message else sbar["text"]
+        error_message = f"{message}: {sbar.text}" if message else sbar.text
         raise exception(error_message)
 
     def raise_if_error_dialog(
