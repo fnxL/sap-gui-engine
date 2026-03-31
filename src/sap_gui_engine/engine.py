@@ -171,6 +171,13 @@ class SAPGuiEngine:
 
         return None
 
+    def _create_new_connection(self) -> GuiSession:
+        logger.info(f"Creating new connection for user: {self.username}")
+        connection = self._app.OpenConnection(self.connection_name, True)
+        session = GuiSession(connection.Children(0))
+        self._login(session)
+        return session
+
     # TODO: Implement automatic password change and update password in keyring.
     def _login(
         self,
