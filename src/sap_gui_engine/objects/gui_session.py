@@ -8,6 +8,7 @@ from sap_gui_engine.exceptions import (
     SAPTransactionError,
 )
 
+from .gui_table_control import GuiTableControl
 from .gui_vcomponent import GuiVComponent
 from .session_info import SessionInfo
 from .statusbar_msg import StatusbarMsg
@@ -84,6 +85,9 @@ class GuiSession:
             if raise_error:
                 raise SAPElementNotFound(f"The element with ID: {id} not found")
             return None
+
+        if element.Type == GuiObject.TABLE_CONTROL:
+            return GuiTableControl(element, id, self)
 
         return GuiVComponent(element)
 
