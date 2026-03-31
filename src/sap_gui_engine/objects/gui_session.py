@@ -8,7 +8,6 @@ from sap_gui_engine.exceptions import (
     SAPTransactionError,
 )
 
-from .gui_table_control import GuiTableControl
 from .gui_vcomponent import GuiVComponent
 from .session_info import SessionInfo
 from .statusbar_msg import StatusbarMsg
@@ -87,6 +86,8 @@ class GuiSession:
             return None
 
         if element.Type == GuiObject.TABLE_CONTROL:
+            from .gui_table_control import GuiTableControl
+
             return GuiTableControl(element, id, self)
 
         return GuiVComponent(element)
