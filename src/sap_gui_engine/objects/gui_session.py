@@ -248,7 +248,7 @@ class GuiSession:
         # Check if tcode was valid
         status = self.get_statusbar_msg()
         if status.text and "does not exist" in status.text.lower():
-            raise SAPTransactionError(f"Transaction {tcode} failed: {status['text']}")
+            raise SAPTransactionError(f"Transaction {tcode} failed: {status.text}")
 
     def end_transaction(self) -> None:
         """Ends the current SAP transaction. (equivalent to /n)"""
