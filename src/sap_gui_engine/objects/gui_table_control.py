@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from sap_gui_engine.constants import GuiObject, VKey
 from sap_gui_engine.exceptions import (
@@ -7,8 +7,10 @@ from sap_gui_engine.exceptions import (
     SAPTableConfigurationError,
 )
 
-from .gui_session import GuiSession
 from .gui_vcomponent import GuiVComponent
+
+if TYPE_CHECKING:
+    from .gui_session import GuiSession
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +20,7 @@ class GuiTableControl:
         self,
         com_element: Any,
         table_id: str,
-        __parent_class__: GuiSession,
+        __parent_class__: "GuiSession",
     ):
         if com_element.type != GuiObject.TABLE_CONTROL:
             raise SAPElementNotChangeable(

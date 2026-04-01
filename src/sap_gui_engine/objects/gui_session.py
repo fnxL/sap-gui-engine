@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, Type, overload
 
 from sap_gui_engine.constants import ControlID, GuiObject, VKey
 from sap_gui_engine.exceptions import (
@@ -8,6 +8,7 @@ from sap_gui_engine.exceptions import (
     SAPTransactionError,
 )
 
+from .gui_table_control import GuiTableControl
 from .gui_vcomponent import GuiVComponent
 from .session_info import SessionInfo
 from .statusbar_msg import StatusbarMsg
@@ -42,6 +43,9 @@ class GuiSession:
         return self._com_session
 
     def close_session(self):
+        """
+        Closes the current session.
+        """
         self._com_session.SendCommand("/i")
         # If this is not the last session, the session closes here immediately and _com_session object becomes unknown, so find_by_id will throw an
         try:
@@ -53,11 +57,21 @@ class GuiSession:
             pass
         return
 
+    @overload
+    def find_by_id(
+        self, id: str, raise_error: bool = True
+    ) -> GuiVComponent | GuiTableControl: ...
+
+    @overload
+    def find_by_id(
+        self, id: str, raise_error: bool = False
+    ) -> Optional["GuiVComponent"]: ...
+
     def find_by_id(
         self,
         id: str,
         raise_error: bool = True,
-    ) -> Optional[GuiVComponent]:
+    ) -> Optional[GuiVComponent | GuiTableControl]:
         """
         Finds a GUI component by its SAP ID
 
@@ -86,8 +100,6 @@ class GuiSession:
             return None
 
         if element.Type == GuiObject.TABLE_CONTROL:
-            from .gui_table_control import GuiTableControl
-
             return GuiTableControl(element, id, self)
 
         return GuiVComponent(element)
@@ -183,7 +195,7 @@ class GuiSession:
     def raise_for_status(
         self,
         message: str | None = None,
-        exception: Exception = SAPStatusBarError,
+        exception: Type[Exception] = SAPStatusBarError,
     ) -> StatusbarMsg:
         """Checks the status bar for error message type and raises the given exception
 
@@ -204,9 +216,26 @@ class GuiSession:
     def raise_if_error_dialog(
         self,
         window_index: int = 1,
-        exception=SAPTransactionError,
+        exception: Type[Exception] = SAPTransactionError,
         message="Error dialog detected",
     ) -> None:
+        """
+        Raises an exception if the there is a ModalWindow which is not a popup dialog
+
+        Parameters
+        ----------
+        window_index : int, optional
+            The window index to check, by default 1
+        exception : Type[Exception], optional
+            The exception object to raise, by default SAPTransactionError
+        message : str, optional
+            Optional message to prepend to the error message, by default "Error dialog detected"
+
+        Raises
+        ------
+        exception
+            If the window is a modal window and not a popup dialog
+        """
         wnd = self.find_by_id(f"wnd[{window_index}]", raise_error=False)
 
         if not wnd:
@@ -254,7 +283,15 @@ class GuiSession:
         """Ends the current SAP transaction. (equivalent to /n)"""
         self._com_session.EndTransaction()
 
-    def get_session_info(self):
+    def get_session_info(self) -> SessionInfo:
+        """
+        Get current session info
+
+        Returns
+        -------
+        SessionInfo
+            Details of the current session
+        """
         info = self._com_session.info
         return SessionInfo(
             application_server=info.ApplicationServer,
