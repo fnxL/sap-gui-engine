@@ -252,7 +252,7 @@ class SAPGuiEngine:
                 session.press_enter(1)
 
         # Dismiss any other popup dialogs that may appear
-        session.dismiss_popups()
+        session.dismiss_popups(limit=10)
         return True
 
     def _connect_to_engine(self):
