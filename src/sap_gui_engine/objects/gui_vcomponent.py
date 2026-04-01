@@ -32,12 +32,12 @@ class GuiVComponent:
         return self._com_element
 
     @property
-    def name(self) -> str:
+    def name(self) -> str | None:
         if hasattr(self._com_element, "Name"):
             return self._com_element.Name
 
     @property
-    def type(self) -> str:
+    def type(self) -> str | None:
         if hasattr(self._com_element, "Type"):
             return self._com_element.Type
 
@@ -63,6 +63,7 @@ class GuiVComponent:
         """
         if hasattr(self._com_element, "Visualize"):
             return bool(self._com_element.Visualize(value))
+        return False
 
     @property
     def text(self) -> str:
@@ -247,32 +248,38 @@ class GuiVComponent:
             f"Option '{text}' not found in ComboBox {self.name}"
         )
 
-    def click(self) -> None:
+    def click(self) -> bool:
         """
-        Clicks/presses/selects the SAP element based on its type.
+        Clicks/presses/selects the SAP element based on its type if its clickable.
 
         This method performs the appropriate action for the following element types:
             - GuiButton: Presses the button
             - GuiTab: Selects the tab
             - GuiRadioButton: Selects the radio button
             - GuiCheckBox: Calling this method will toggle the checkbox
+
+        Returns
+        -------
+        bool
+            True if the action was successful, False otherwise
         """
 
         # Try standard methods
         if hasattr(self._com_element, "press"):
             self._com_element.press()
-            return
+            return True
 
         if hasattr(self._com_element, "select"):
             self._com_element.select()
-            return
+            return True
 
         # Checkboxes often use 'selected' property
         if hasattr(self._com_element, "selected"):
             self._com_element.selected = not self._com_element.selected
-            return
+            return True
 
-        raise AttributeError(f"Element {self.name} ({self.type}) is not clickable.")
+        logger.warning(f"Element {self.name} ({self.type}) is not clickable.")
+        return False
 
     def send_vkey(self, key: VKey | int) -> None:
         """Sends a virtual key to this element (usually a window)."""
