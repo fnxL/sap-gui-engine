@@ -42,7 +42,7 @@ class GuiSession:
         """Gets the underlying native SAP GUI session object."""
         return self._com_session
 
-    def close_session(self):
+    def close(self):
         """
         Closes the current session.
         """
