@@ -137,9 +137,14 @@ class GuiSession:
             VKey.ENTER, window_index=window_index, repeat_count=repeat_count
         )
 
-    def dismiss_popups(self, key: VKey = VKey.ENTER, window_index: int = 1) -> None:
+    def dismiss_popups(
+        self,
+        key: VKey = VKey.ENTER,
+        window_index: int = 1,
+        limit: int | None = None,
+    ) -> None:
         """
-        Dismisses popup dialogs until there are no popups by sending a specific key to the popup window
+        Dismisses popup dialogs until there are no popups or limit is reached by sending a specific key to the popup window
 
         Parameters
         ----------
@@ -147,14 +152,20 @@ class GuiSession:
             The key to send to dismiss the popup, by default VKey.ENTER
         window_index : int, optional
             The index of the popup dialog window, by default 1
+        limit : int | None, optional
+            The maximum number of popups to dismiss, by default None
         """
         window_id = f"wnd[{window_index}]"
-
+        count = 0
         while True:
+            if limit and count >= limit:
+                logger.debug(f"Reached limit of dismissing {limit} popups. Stopping.")
+                return
+
             wnd = self.find_by_id(window_id, raise_error=False)
             if not wnd:
                 logger.debug("No more popup dialogs found. Stopping.")
-                break
+                return
 
             if wnd.type == GuiObject.MODAL_WINDOW and wnd.isPopupDialog:
                 logger.debug(
@@ -163,7 +174,7 @@ class GuiSession:
                 wnd.send_vkey(key)
             else:
                 logger.debug("No more popup dialogs found. Stopping.")
-                break
+                return
 
     def get_statusbar_msg(self) -> StatusbarMsg:
         """
