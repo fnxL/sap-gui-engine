@@ -14,8 +14,8 @@ class SAPConfig(BaseSettings):
     password: str
     client: str | None = None
     language: str | None = None
-    executable_path: str | None = None
-    window_title_re: str | None = None
+    executable_path: str = r"C:\Program Files\SAP\FrontEnd\SAPGUI\saplogon.exe"
+    window_title_re: str = "SAP Logon 800"
 
 
 @pytest.fixture
