@@ -267,7 +267,7 @@ class GuiSession:
         """Maximizes the main window."""
         self.find_by_id(GuiObject.MAIN_WINDOW).maximize()
 
-    def start_transaction(self, tcode: str) -> None:
+    def start_transaction(self, tcode: str) -> bool:
         """
         Starts a new transaction. Ends any current transaction first.
 
@@ -275,6 +275,11 @@ class GuiSession:
         ----------
         tcode : str
             Code of the transaction to start.
+
+        Returns
+        -------
+        bool
+            True if the transaction was started successfully.
 
         Raises
         ------
@@ -289,6 +294,8 @@ class GuiSession:
         status = self.get_statusbar_msg()
         if status.text and "does not exist" in status.text.lower():
             raise SAPTransactionError(f"Transaction {tcode} failed: {status.text}")
+
+        return True
 
     def end_transaction(self) -> None:
         """Ends the current SAP transaction. (equivalent to /n)"""
