@@ -18,10 +18,11 @@ class SAPConfig(BaseSettings):
     window_title_re: str = "SAP Logon 800"
 
 
-@pytest.fixture
-def session() -> GuiSession:
+@pytest.fixture(scope="session")
+def session():
     config = SAPConfig().model_dump()
     print(config)
     sap = SAPGuiEngine(**config)
     session = sap.open_connection()
-    return session
+    yield session
+    session.close()
