@@ -2,7 +2,6 @@ import pytest
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from sap_gui_engine import SAPGuiEngine
-from sap_gui_engine.objects import GuiSession
 
 
 class SAPConfig(BaseSettings):
