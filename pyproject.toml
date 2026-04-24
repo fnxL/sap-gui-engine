@@ -1,6 +1,6 @@
 [project]
 name = "sap-gui-engine"
-version = "0.1.0"
+version = "0.1.1"
 description = "Python framework for SAP GUI Scripting/Automation"
 readme = "README.md"
 authors = [{ name = "fnxL", email = "ajaykanki18@gmail.com" }]
