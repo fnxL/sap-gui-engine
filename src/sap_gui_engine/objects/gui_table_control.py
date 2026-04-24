@@ -37,10 +37,10 @@ class GuiTableControl:
 
     def __setattr__(self, name, value):
         """
-        Set attributes on the GuiTableControl instance or delegate to the underlying _com_element if the attribute doesn't exist on the instance itself.
+        Set attributes on this class instance or delegate to the underlying _com_element if the attribute does not exist on the class instnace.
         """
         try:
-            element = object.__getattribute__(self, "_element")
+            element = object.__getattribute__(self, "_com_element")
             if hasattr(element, name):
                 setattr(element, name, value)
         except AttributeError:
