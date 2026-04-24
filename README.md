@@ -103,6 +103,19 @@ session.dismiss_popups()
 session.dismiss_popups(limit=10)
 ```
 
+OR Use SAPGuiEngine as a context manager
+```python
+from sap_gui_engine import SAPGuiEngine
+
+with SAPGuiEngine(
+    connection_name="340 Quality",
+    username="username",
+    password="password",
+) as session:
+    session.start_transaction("SE16N")
+    # Perform operations with session.
+```
+
 ### Working with tables
 ```python
 from sap_gui_engine import SAPGuiEngine
