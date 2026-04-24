@@ -37,6 +37,19 @@ class GuiSession:
         """
         return getattr(self._com_session, name)
 
+    def __setattr__(self, name, value):
+        """
+        Set attributes on this class instance or delegate to the underlying _com_element if the attribute does not exist on the class instnace.
+        """
+        try:
+            element = object.__getattribute__(self, "_com_element")
+            if hasattr(element, name):
+                setattr(element, name, value)
+        except AttributeError:
+            # Fallback
+            pass
+        object.__setattr__(self, name, value)
+
     @property
     def session(self):
         """Gets the underlying native SAP GUI session object."""
