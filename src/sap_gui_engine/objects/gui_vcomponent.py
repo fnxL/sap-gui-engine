@@ -26,6 +26,20 @@ class GuiVComponent:
         """Delegate attribute access to the underlying SAP element."""
         return getattr(self._com_element, name)
 
+    def __setattr__(self, name, value):
+        """
+        Set attributes on this class instance or delegate to the underlying _com_element if the attribute does not exist on the class instnace.
+        """
+        try:
+            element = object.__getattribute__(self, "_com_element")
+            if hasattr(element, name):
+                setattr(element, name, value)
+        except AttributeError:
+            # Fallback
+            pass
+
+        object.__setattr__(self, name, value)
+
     @property
     def element(self) -> Any:
         """Access the raw COM element."""
