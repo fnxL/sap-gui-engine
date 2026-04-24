@@ -64,6 +64,21 @@ class SAPGuiEngine:
         self._sap_gui_auto = None
         self._app = None
         self._com_connection = None
+        self._session: GuiSession = None
+
+    def __enter__(self):
+        """
+        If used as context manager, setup the connection and return the GuiSession object
+        """
+        self._session = self.open_connection()
+        return self._session
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """
+        Teardown to cleanup the resources.
+        """
+        if self._session:
+            self._session.close()
 
     def open_connection(self) -> GuiSession:
         """Open a connection to the SAP system.
