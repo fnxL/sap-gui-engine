@@ -42,16 +42,24 @@ class GuiSession:
         """Gets the underlying native SAP GUI session object."""
         return self._com_session
 
-    def close(self):
+    def close(self, window_depth: int = 5):
         """
         Closes the current session.
         """
         self._com_session.SendCommand("/i")
         # If this is not the last session, the session closes here immediately and _com_session object becomes unknown, so find_by_id will throw an
         try:
-            dlg = self.find_by_id("wnd[1]/usr/btnSPOP-OPTION1", False)
-            if dlg:
-                dlg.click()
+            # Sometimes the confirmation dialog may be in wnd[1], wnd[2] and so on.
+            wnd_idx = 1
+            while wnd_idx <= window_depth:
+                dlg = self.find_by_id(
+                    f"wnd[{wnd_idx}]/usr/btnSPOP-OPTION1",
+                    raise_error=False,
+                )
+                if dlg:
+                    dlg.click()
+                    break
+                wnd_idx += 1
         except Exception:
             # This is expected if the session is not the last one.
             pass
